@@ -12,6 +12,9 @@ export class User {
   password: string;
 
   @Column()
+  phone: string;
+
+  @Column()
   createddate: Date;
 
   // @Column({ type: 'jsonb', default: [] })
