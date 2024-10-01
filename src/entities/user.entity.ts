@@ -2,8 +2,8 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Profile } from './profile.entity';
 
@@ -22,17 +22,17 @@ export class User {
   phone: string;
 
   @Column()
-  createddate: Date;
+  created_date: Date;
 
-  // @Column({ type: 'jsonb', default: [] })
-  // refreshtokenlist: string[];
+  @Column({ type: 'jsonb', default: [] })
+  refresh_token_list: string[];
 
   @Column()
   active: boolean;
 
-  @OneToOne(() => Profile, (Profile) => Profile.user, {
+  @OneToMany(() => Profile, (Profile) => Profile.user, {
     eager: false,
   })
   @JoinColumn()
-  profile: Profile;
+  profile: Profile[];
 }

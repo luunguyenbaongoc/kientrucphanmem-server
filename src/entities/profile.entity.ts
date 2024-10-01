@@ -2,8 +2,8 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  OneToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -18,7 +18,7 @@ export class Profile {
   @Column()
   avatar: string;
 
-  @OneToOne(() => User, (User) => User.id, { eager: false })
+  @OneToMany(() => User, (User) => User.id, { eager: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
