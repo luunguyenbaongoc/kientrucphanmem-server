@@ -4,7 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './configs/typeorm.config';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { APP_PIPE } from '@nestjs/core';
+import { APP_GUARD, APP_PIPE } from '@nestjs/core';
+import { PassportModule } from '@nestjs/passport';
+import { JwtAuthGuard } from './modules/auth/guards';
 
 @Module({
   imports: [
@@ -15,12 +17,17 @@ import { APP_PIPE } from '@nestjs/core';
     }),
     UserModule,
     AuthModule,
+    PassportModule,
   ],
   controllers: [],
   providers: [
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
   ],
 })
