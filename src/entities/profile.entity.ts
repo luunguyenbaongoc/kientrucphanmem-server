@@ -18,6 +18,9 @@ export class Profile {
   @Column()
   avatar: string;
 
+  @Column()
+  user_id: string;
+
   @OneToMany(() => User, (User) => User.id, { eager: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
