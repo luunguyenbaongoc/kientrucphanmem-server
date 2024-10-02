@@ -1,6 +1,15 @@
-import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Public } from 'src/decorators/public.decorator';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -8,8 +17,15 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Get('/check-user-exist/:phone')
+  @Get('check-user-exist/:phone')
   checkUserExistByPhone(@Param('phone') phone: string) {
     return this.authService.checkUserExistByPhone(phone);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.CREATED)
+  @Post('register')
+  register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
   }
 }

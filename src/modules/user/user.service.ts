@@ -13,4 +13,9 @@ export class UserService {
   async findUserByPhone(phone: string): Promise<User | undefined> {
     return await this.usersRepository.findOneBy({ phone });
   }
+
+  async addUser(user: User): Promise<User | undefined> {
+    await this.usersRepository.insert(user);
+    return await this.usersRepository.findOneBy({ phone: user.phone });
+  }
 }
