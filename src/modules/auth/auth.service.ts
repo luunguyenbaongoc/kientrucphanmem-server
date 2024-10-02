@@ -13,6 +13,7 @@ import * as path from 'path';
 import { DataSource } from 'typeorm';
 import { LogInDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
+import { ResetPasswordDto } from './dto/resset-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +37,7 @@ export class AuthService {
       throw new AppError(
         HttpStatus.INTERNAL_SERVER_ERROR,
         ErrorCode.INTERNAL_SERVER_ERROR,
-        `Kiểm tra người dùng: ${ex}`,
+        `${ex}`,
       );
     }
   }
@@ -105,7 +106,7 @@ export class AuthService {
       throw new AppError(
         HttpStatus.INTERNAL_SERVER_ERROR,
         ErrorCode.INTERNAL_SERVER_ERROR,
-        `Đăng ký: ${ex}`,
+        `${ex}`,
       );
     } finally {
       // you need to release a queryRunner which was manually instantiated
@@ -139,57 +140,93 @@ export class AuthService {
   }
 
   async logIn(loginDto: LogInDto): Promise<LoginResult | undefined> {
-    const { phone, password } = { ...loginDto };
+    try {
+      const { phone, password } = { ...loginDto };
 
-    const user = await this.userService.findUserByPhone(phone);
+      const user = await this.userService.findUserByPhone(phone);
 
-    const loginResult: LoginResult = {
-      is_success: false,
-      access_token: null,
-      refresh_token: null,
-      user: user
-        ? {
-            id: user.id,
-          }
-        : null,
-      error: null,
-    };
+      const loginResult: LoginResult = {
+        is_success: false,
+        access_token: null,
+        refresh_token: null,
+        user: user
+          ? {
+              id: user.id,
+            }
+          : null,
+        error: null,
+      };
 
-    if (!user) {
+      if (!user) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `${`Người dùng ${phone} không tồn tại`}`,
+        );
+      }
+
+      if (!(await bcrypt.compare(password, user.password))) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Sai mật khẩu`,
+        );
+      }
+
+      if (!user.active) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên để mở khóa.`,
+        );
+      }
+
+      const token: Token = await this.getTokens(user.id, user.phone);
+
+      await this.userService.addRefreshToken(
+        user.id,
+        await argon2.hash(token.refresh_token),
+      );
+
+      return {
+        ...loginResult,
+        is_success: true,
+        ...token,
+      };
+    } catch (ex) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.BAD_REQUEST,
-        `${`Người dùng ${phone} không tồn tại`}`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.INTERNAL_SERVER_ERROR,
+        `${ex}`,
       );
     }
+  }
 
-    if (!(await bcrypt.compare(password, user.password))) {
+  async resetPassword(
+    resetPasswordDto: ResetPasswordDto,
+  ): Promise<LoginResult | undefined> {
+    try {
+      const { phone, new_password } = { ...resetPasswordDto };
+      const userByPhone = await this.userService.findUserByPhone(phone);
+
+      if (!userByPhone) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Người dùng ${phone} không tồn tại`,
+        );
+      }
+
+      userByPhone.password = await this.hashData(new_password);
+      await this.userService.saveUser(userByPhone);
+
+      return await this.logIn({ phone: phone, password: new_password });
+    } catch (ex) {
       throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.BAD_REQUEST,
-        `Sai mật khẩu`,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        ErrorCode.INTERNAL_SERVER_ERROR,
+        `${ex}`,
       );
     }
-
-    if (!user.active) {
-      throw new AppError(
-        HttpStatus.BAD_REQUEST,
-        ErrorCode.BAD_REQUEST,
-        `Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên để mở khóa.`,
-      );
-    }
-
-    const token: Token = await this.getTokens(user.id, user.phone);
-
-    await this.userService.addRefreshToken(
-      user.id,
-      await argon2.hash(token.refresh_token),
-    );
-
-    return {
-      ...loginResult,
-      is_success: true,
-      ...token,
-    };
   }
 }
