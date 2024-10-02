@@ -10,6 +10,7 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { Public } from 'src/decorators/public.decorator';
 import { RegisterDto } from './dto/register.dto';
+import { LogInDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,5 +28,12 @@ export class AuthController {
   @Post('register')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('login')
+  logIn(@Body() logInDto: LogInDto) {
+    return this.authService.logIn(logInDto);
   }
 }

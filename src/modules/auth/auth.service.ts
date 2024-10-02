@@ -3,7 +3,7 @@ import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
-import { RegisterResult } from './types';
+import { LoginResult, RegisterResult, Token } from './types';
 import { Profile, User } from 'src/entities';
 import * as bcrypt from 'bcrypt';
 import * as argon2 from 'argon2';
@@ -11,6 +11,8 @@ import { ProfileService } from '../profile/profile.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DataSource } from 'typeorm';
+import { LogInDto } from './dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +20,7 @@ export class AuthService {
     private userService: UserService,
     private profileService: ProfileService,
     private dataSource: DataSource,
+    private jwtService: JwtService,
   ) {}
 
   async checkUserExistByPhone(phone: string): Promise<boolean> {
@@ -33,7 +36,7 @@ export class AuthService {
       throw new AppError(
         HttpStatus.INTERNAL_SERVER_ERROR,
         ErrorCode.INTERNAL_SERVER_ERROR,
-        `check user exists error: ${ex}`,
+        `Kiểm tra người dùng: ${ex}`,
       );
     }
   }
@@ -67,7 +70,7 @@ export class AuthService {
         throw new AppError(
           HttpStatus.BAD_REQUEST,
           ErrorCode.BAD_REQUEST,
-          `Đăng ký: ${`Người dùng ${phone} đã tồn tại`}`,
+          `${`Người dùng ${phone} đã tồn tại`}`,
         );
       }
 
@@ -108,5 +111,85 @@ export class AuthService {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
     }
+  }
+
+  async getAccessToken(payload: any) {
+    return await this.jwtService.signAsync(payload, {
+      secret: process.env.ACCESS_TOKEN_SECRET,
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRATION_TIME,
+    });
+  }
+
+  async getRefreshToken(payload: any) {
+    return await this.jwtService.signAsync(payload, {
+      secret: process.env.REFRESH_TOKEN_SECRET,
+      expiresIn: process.env.REFHRES_TOKEN_EXPIRATION_TIME,
+    });
+  }
+
+  async getTokens(id: string, phone: string) {
+    const payload: any = this.genPayload(id, phone);
+
+    const [access_token, refresh_token] = await Promise.all([
+      this.getAccessToken(payload),
+      this.getRefreshToken(payload),
+    ]);
+
+    return { access_token, refresh_token };
+  }
+
+  async logIn(loginDto: LogInDto): Promise<LoginResult | undefined> {
+    const { phone, password } = { ...loginDto };
+
+    const user = await this.userService.findUserByPhone(phone);
+
+    const loginResult: LoginResult = {
+      is_success: false,
+      access_token: null,
+      refresh_token: null,
+      user: user
+        ? {
+            id: user.id,
+          }
+        : null,
+      error: null,
+    };
+
+    if (!user) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.BAD_REQUEST,
+        `${`Người dùng ${phone} không tồn tại`}`,
+      );
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.BAD_REQUEST,
+        `Sai mật khẩu`,
+      );
+    }
+
+    if (!user.active) {
+      throw new AppError(
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.BAD_REQUEST,
+        `Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên để mở khóa.`,
+      );
+    }
+
+    const token: Token = await this.getTokens(user.id, user.phone);
+
+    await this.userService.addRefreshToken(
+      user.id,
+      await argon2.hash(token.refresh_token),
+    );
+
+    return {
+      ...loginResult,
+      is_success: true,
+      ...token,
+    };
   }
 }
