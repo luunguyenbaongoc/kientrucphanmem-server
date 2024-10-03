@@ -13,6 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LogInDto } from './dto';
 import { ResetPasswordDto } from './dto/resset-password.dto';
 import { AuthUser, RefreshToken } from 'src/decorators/user.decorator';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -52,10 +53,10 @@ export class AuthController {
     return this.authService.logout(userId, refreshToken);
   }
 
-  // @Public()
-  // @HttpCode(HttpStatus.OK)
-  // @Post('refresh')
-  // refresh(@HasuraBody() refreshDto: RefreshDto) {
-  //   return this.authService.refresh(refreshDto);
-  // }
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  refresh(@Body() refreshDto: RefreshDto) {
+    return this.authService.refresh(refreshDto);
+  }
 }

@@ -5,8 +5,8 @@ export class RefreshDto {
   id: string;
 
   @IsString({ message: 'Không có refresh token' })
-  refreshToken: string;
+  refresh_token: string;
 
   @IsBoolean()
-  isNewRefreshToken: boolean;
+  is_new_refresh_token: boolean;
 }

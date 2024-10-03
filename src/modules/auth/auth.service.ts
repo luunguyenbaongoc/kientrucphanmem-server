@@ -103,6 +103,7 @@ export class AuthService {
         },
       };
     } catch (ex) {
+      Logger.error(ex);
       await queryRunner.rollbackTransaction();
       throw ex;
     } finally {
@@ -183,6 +184,7 @@ export class AuthService {
         ...token,
       };
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
   }
@@ -201,6 +203,7 @@ export class AuthService {
 
       return await this.logIn({ phone: phone, password: new_password });
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
   }
@@ -234,6 +237,7 @@ export class AuthService {
         selectedRefreshToken,
       );
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
 
@@ -242,12 +246,12 @@ export class AuthService {
 
   async refresh(refreshDto: RefreshDto): Promise<Token | undefined> {
     try {
-      const { id, isNewRefreshToken, refreshToken } = { ...refreshDto };
+      const { id, is_new_refresh_token, refresh_token } = { ...refreshDto };
       const user = await this.userService.findByIdAndCheckExist(id);
 
       let token: Token = {
         access_token: null,
-        refresh_token: refreshToken,
+        refresh_token: refresh_token,
       };
 
       if (!user.active) {
@@ -266,7 +270,7 @@ export class AuthService {
         return null;
       }
 
-      if (isNewRefreshToken) {
+      if (is_new_refresh_token) {
         token = await this.getTokens(user.id, user.phone);
         await this.userService.removeRefreshToken(
           user.id,
@@ -286,6 +290,7 @@ export class AuthService {
 
       return token;
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
   }
