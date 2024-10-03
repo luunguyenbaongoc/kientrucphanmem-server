@@ -1,6 +1,5 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { RegisterDto } from './dto/register.dto';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { LoginResult, RegisterResult, Token } from './types';
@@ -11,10 +10,14 @@ import { ProfileService } from '../profile/profile.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DataSource } from 'typeorm';
-import { LogInDto } from './dto';
+import {
+  LogInDto,
+  RevokeRefreshDto,
+  RefreshDto,
+  RegisterDto,
+  ResetPasswordDto,
+} from './dto';
 import { JwtService } from '@nestjs/jwt';
-import { ResetPasswordDto } from './dto/resset-password.dto';
-import { RefreshDto } from './dto/refresh.dto';
 
 @Injectable()
 export class AuthService {
@@ -291,6 +294,33 @@ export class AuthService {
       return token;
     } catch (ex) {
       Logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async revokeRefreshToken(
+    revokeRefreshDto: RevokeRefreshDto,
+  ): Promise<boolean> {
+    try {
+      const { id, refresh_token } = { ...revokeRefreshDto };
+      const user = await this.userService.findByIdAndCheckExist(id);
+
+      const oldHashedRefreshToken = await this.getHashedRefreshTokenFromList(
+        refresh_token,
+        user.refresh_token_list,
+      );
+      if (!oldHashedRefreshToken) {
+        return true;
+      }
+
+      await this.userService.removeRefreshToken(
+        user.id,
+        user.refresh_token_list,
+        oldHashedRefreshToken,
+      );
+
+      return true;
+    } catch (ex) {
       throw ex;
     }
   }

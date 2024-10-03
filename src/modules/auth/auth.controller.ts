@@ -8,12 +8,14 @@ import {
   Post,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Public } from 'src/decorators/public.decorator';
-import { RegisterDto } from './dto/register.dto';
-import { LogInDto } from './dto';
-import { ResetPasswordDto } from './dto/resset-password.dto';
-import { AuthUser, RefreshToken } from 'src/decorators/user.decorator';
-import { RefreshDto } from './dto/refresh.dto';
+import { Public, AuthUser, RefreshToken } from 'src/decorators';
+import {
+  LogInDto,
+  RevokeRefreshDto,
+  RefreshDto,
+  ResetPasswordDto,
+  RegisterDto,
+} from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -58,5 +60,12 @@ export class AuthController {
   @Post('refresh')
   refresh(@Body() refreshDto: RefreshDto) {
     return this.authService.refresh(refreshDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('revoke-refresh')
+  revokeRefresh(@Body() revokeRefreshDto: RevokeRefreshDto) {
+    return this.authService.revokeRefreshToken(revokeRefreshDto);
   }
 }
