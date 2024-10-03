@@ -401,3 +401,4 @@ dist
 .webpack
 .serverless/**/*.zip
 config.yaml
+*.tar
