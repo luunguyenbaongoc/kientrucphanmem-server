@@ -26,7 +26,7 @@ export class AuthService {
 
   async checkUserExistByPhone(phone: string): Promise<boolean> {
     try {
-      const userByPhone = await this.userService.findUserByPhone(phone);
+      const userByPhone = await this.userService.findByPhone(phone);
 
       if (userByPhone) {
         return true;
@@ -103,11 +103,7 @@ export class AuthService {
       };
     } catch (ex) {
       await queryRunner.rollbackTransaction();
-      throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        ErrorCode.INTERNAL_SERVER_ERROR,
-        `${ex}`,
-      );
+      throw ex;
     } finally {
       // you need to release a queryRunner which was manually instantiated
       await queryRunner.release();
@@ -143,7 +139,7 @@ export class AuthService {
     try {
       const { phone, password } = { ...loginDto };
 
-      const user = await this.userService.findUserByPhone(phone);
+      const user = await this.userService.findByPhoneAndCheckExist(phone);
 
       const loginResult: LoginResult = {
         is_success: false,
@@ -156,14 +152,6 @@ export class AuthService {
           : null,
         error: null,
       };
-
-      if (!user) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.BAD_REQUEST,
-          `${`Người dùng ${phone} không tồn tại`}`,
-        );
-      }
 
       if (!(await bcrypt.compare(password, user.password))) {
         throw new AppError(
@@ -194,11 +182,7 @@ export class AuthService {
         ...token,
       };
     } catch (ex) {
-      throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        ErrorCode.INTERNAL_SERVER_ERROR,
-        `${ex}`,
-      );
+      throw ex;
     }
   }
 
@@ -207,26 +191,51 @@ export class AuthService {
   ): Promise<LoginResult | undefined> {
     try {
       const { phone, new_password } = { ...resetPasswordDto };
-      const userByPhone = await this.userService.findUserByPhone(phone);
-
-      if (!userByPhone) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.BAD_REQUEST,
-          `Người dùng ${phone} không tồn tại`,
-        );
-      }
+      const userByPhone = await this.userService.findByPhoneAndCheckExist(
+        phone,
+      );
 
       userByPhone.password = await this.hashData(new_password);
       await this.userService.saveUser(userByPhone);
 
       return await this.logIn({ phone: phone, password: new_password });
     } catch (ex) {
-      throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        ErrorCode.INTERNAL_SERVER_ERROR,
-        `${ex}`,
-      );
+      throw ex;
     }
+  }
+
+  async getHashedRefreshTokenFromList(
+    refreshToken: string,
+    userRefreshTokenList: string[],
+  ): Promise<string> {
+    let hashedRefreshToken: string = null;
+    for (const i in userRefreshTokenList) {
+      if (await argon2.verify(userRefreshTokenList[i], refreshToken)) {
+        hashedRefreshToken = userRefreshTokenList[i];
+        break;
+      }
+    }
+    return hashedRefreshToken;
+  }
+
+  async logout(id: string, refreshToken: string): Promise<boolean> {
+    try {
+      const user = await this.userService.findByIdAndCheckExist(id);
+
+      const selectedRefreshToken = await this.getHashedRefreshTokenFromList(
+        refreshToken,
+        user.refresh_token_list,
+      );
+
+      await this.userService.removeRefreshToken(
+        user.id,
+        user.refresh_token_list,
+        selectedRefreshToken,
+      );
+    } catch (ex) {
+      throw ex;
+    }
+
+    return true;
   }
 }
