@@ -12,6 +12,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { RegisterDto } from './dto/register.dto';
 import { LogInDto } from './dto';
 import { ResetPasswordDto } from './dto/resset-password.dto';
+import { AuthUser, RefreshToken } from 'src/decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -44,4 +45,17 @@ export class AuthController {
   resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(resetPasswordDto);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  logOut(@AuthUser() userId: string, @RefreshToken() refreshToken: string) {
+    return this.authService.logout(userId, refreshToken);
+  }
+
+  // @Public()
+  // @HttpCode(HttpStatus.OK)
+  // @Post('refresh')
+  // refresh(@HasuraBody() refreshDto: RefreshDto) {
+  //   return this.authService.refresh(refreshDto);
+  // }
 }

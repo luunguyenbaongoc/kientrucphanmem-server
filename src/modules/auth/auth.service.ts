@@ -14,6 +14,7 @@ import { DataSource } from 'typeorm';
 import { LogInDto } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import { ResetPasswordDto } from './dto/resset-password.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Injectable()
 export class AuthService {
@@ -237,5 +238,55 @@ export class AuthService {
     }
 
     return true;
+  }
+
+  async refresh(refreshDto: RefreshDto): Promise<Token | undefined> {
+    try {
+      const { id, isNewRefreshToken, refreshToken } = { ...refreshDto };
+      const user = await this.userService.findByIdAndCheckExist(id);
+
+      let token: Token = {
+        access_token: null,
+        refresh_token: refreshToken,
+      };
+
+      if (!user.active) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên để mở khóa.`,
+        );
+      }
+
+      const oldHashedRefreshToken = await this.getHashedRefreshTokenFromList(
+        token.refresh_token,
+        user.refresh_token_list,
+      );
+      if (!oldHashedRefreshToken) {
+        return null;
+      }
+
+      if (isNewRefreshToken) {
+        token = await this.getTokens(user.id, user.phone);
+        await this.userService.removeRefreshToken(
+          user.id,
+          user.refresh_token_list,
+          oldHashedRefreshToken,
+        );
+        await this.userService.addRefreshToken(
+          user.id,
+          await argon2.hash(token.refresh_token),
+        );
+      } else {
+        const access_token = await this.getAccessToken(
+          this.genPayload(user.id, user.phone),
+        );
+        token.access_token = access_token;
+      }
+
+      return token;
+    } catch (ex) {
+      throw ex;
+    }
   }
 }
