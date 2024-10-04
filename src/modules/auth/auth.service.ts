@@ -85,7 +85,7 @@ export class AuthService {
       const newUser = new User();
       newUser.password = await this.hashData(password);
       newUser.phone = phone;
-      const addedUser = await await queryRunner.manager.save(newUser);
+      const addedUser = await queryRunner.manager.save(newUser);
 
       const newProfile = new Profile();
       newProfile.avatar = fs.readFileSync(
