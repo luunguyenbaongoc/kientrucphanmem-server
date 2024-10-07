@@ -85,6 +85,8 @@ export class AuthService {
       const newUser = new User();
       newUser.password = await this.hashData(password);
       newUser.phone = phone;
+      newUser.created_date = new Date();
+      newUser.active = true;
       const addedUser = await queryRunner.manager.save(newUser);
 
       const newProfile = new Profile();
@@ -125,7 +127,7 @@ export class AuthService {
   async getRefreshToken(payload: any) {
     return await this.jwtService.signAsync(payload, {
       secret: process.env.REFRESH_TOKEN_SECRET,
-      expiresIn: process.env.REFHRES_TOKEN_EXPIRATION_TIME,
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION_TIME,
     });
   }
 

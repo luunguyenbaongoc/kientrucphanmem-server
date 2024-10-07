@@ -7,6 +7,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service';
 import { Public, AuthUser, RefreshToken } from 'src/decorators';
 import {
@@ -17,6 +18,7 @@ import {
   RegisterDto,
 } from './dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -24,6 +26,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Get('check-user-exist/:phone')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   checkUserExistByPhone(@Param('phone') phone: string) {
     return this.authService.checkUserExistByPhone(phone);
   }
@@ -31,6 +34,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -38,6 +42,7 @@ export class AuthController {
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   logIn(@Body() logInDto: LogInDto) {
     return this.authService.logIn(logInDto);
   }
