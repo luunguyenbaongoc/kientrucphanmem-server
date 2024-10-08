@@ -32,6 +32,7 @@ export class User {
 
   @OneToMany(() => Profile, (Profile) => Profile.user, {
     eager: false,
+    cascade: true
   })
   @JoinColumn()
   profile: Profile[];

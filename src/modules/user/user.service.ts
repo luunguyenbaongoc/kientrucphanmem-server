@@ -1,15 +1,18 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entities';
+import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
+import { UpdateProfileDto } from './dto';
+import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private profileService: ProfileService
   ) {}
 
   async findByPhone(phone: string): Promise<User | undefined> {
@@ -71,5 +74,24 @@ export class UserService {
     refreshTokenList = refreshTokenList.filter((o) => o !== refreshToken);
     user.refresh_token_list = [...refreshTokenList];
     await this.userRepository.save(user);
+  }
+
+  async createUserProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<Profile> {
+    const user = await this.findByIdAndCheckExist(userId);
+    const newProfile = new Profile();
+    newProfile.fullname = updateProfileDto.fullname;
+    newProfile.user_id = userId;
+    newProfile.user = user;
+    const profile = await this.profileService.addProfile(newProfile);
+    return profile;
+  }
+
+  async updateUserProfile(
+    userId: string, 
+    profileId: string, 
+    updateProfileDto: UpdateProfileDto
+  ): Promise<Profile> {
+    const user = await this.findByIdAndCheckExist(userId);
+    return this.profileService.updateProfile(userId, profileId, updateProfileDto);
   }
 }
