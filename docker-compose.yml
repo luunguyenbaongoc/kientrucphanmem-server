@@ -11,6 +11,7 @@ services:
     volumes:
       - ./:/usr/src/app
       - /usr/src/app/node_modules
+      - /usr/src/app/uploads
     command: npm run start:dev
     environment:
       - DB_HOST=db
@@ -24,7 +25,6 @@ services:
       - REFRESH_TOKEN_SECRET=secrettoken1
       - ACCESS_TOKEN_EXPIRATION_TIME=1d
       - REFRESH_TOKEN_EXPIRATION_TIME=1d
-    
     depends_on:
       - db
 

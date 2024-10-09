@@ -24,7 +24,6 @@ export class ProfileService {
   }
 
   async updateProfile(
-    userId: string, 
     profileId: string, 
     updateProfileDto: UpdateProfileDto
   ): Promise<Profile> {
@@ -41,6 +40,13 @@ export class ProfileService {
     }
 
     profile.fullname = updateProfileDto.fullname || profile.fullname;
+    profile.avatar = updateProfileDto.avatar || profile.avatar;
     return this.profilesRepository.save(profile);
+  }
+
+  async findProfilesByUserId(userId: string): Promise<Profile[] | undefined> {
+    return await this.profilesRepository.find({
+      where: { user_id: userId },
+    });
   }
 }

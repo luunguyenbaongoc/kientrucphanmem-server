@@ -4,6 +4,7 @@ import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
+import { join } from 'path';
 import { UpdateProfileDto } from './dto';
 import { ProfileService } from '../profile/profile.service';
 
@@ -87,11 +88,19 @@ export class UserService {
   }
 
   async updateUserProfile(
-    userId: string, 
     profileId: string, 
     updateProfileDto: UpdateProfileDto
   ): Promise<Profile> {
+    return this.profileService.updateProfile(profileId, updateProfileDto);
+  }
+
+  async getUserProfiles(userId: string): Promise<Profile[]> {
     const user = await this.findByIdAndCheckExist(userId);
-    return this.profileService.updateProfile(userId, profileId, updateProfileDto);
+    return this.profileService.findProfilesByUserId(userId);
+  }
+
+  async uploadProfilePicture(filepath: string, profileId: string): Promise<string> {
+    await this.profileService.updateProfile(profileId, {avatar: filepath} as UpdateProfileDto);
+    return `File uploaded successfully: ${filepath}`;
   }
 }
