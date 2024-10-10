@@ -7,6 +7,8 @@ import {
   Post,
   Get,
   Body,
+  Param,
+  Delete,
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -40,5 +42,21 @@ export class GroupController {
   getUserGroups(@Req() req: Request) {
     const userInfo = req.user;
     return this.groupService.findByUserId(userInfo['id'])
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Get('groups/:id')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  getUserGroup(@Param('id') id: string) {
+    return this.groupService.findByUserId(id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Delete('groups/:id')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  deleteUserGroup(@Param('id') id: string) {
+    return this.groupService.deleteGroupById(id);
   }
 }

@@ -82,4 +82,13 @@ export class GroupService {
       where: { group_lead: { id: userId } }
     });
   }
+
+  async deleteGroupById(groupId: string): Promise<void> {
+    const group = await this.findById(groupId);
+    if (!group) {
+      throw new Error('Group not found');
+    }
+
+    await this.groupRepository.delete(groupId);
+  }
 }
