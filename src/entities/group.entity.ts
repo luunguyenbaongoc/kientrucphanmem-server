@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   ManyToOne,
-  ManyToMany
+  ManyToMany,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -20,7 +20,7 @@ export class Group {
   created_date: Date;
 
   @ManyToOne(() => User, (User) => User.id, {
-    eager: true
+    eager: true,
   })
   @JoinColumn()
   group_lead: User;

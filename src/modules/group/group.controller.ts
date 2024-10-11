@@ -10,11 +10,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { 
-  ApiTags, 
-  ApiBearerAuth, 
-  ApiConsumes 
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { Request } from 'express';
 import { GroupService } from './group.service';
 import { JwtAuthGuard } from '../auth/guards';
@@ -26,7 +22,7 @@ import { CreateGroupDto } from './dto';
 export class GroupController {
   constructor(private groupService: GroupService) {}
 
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @Post('groups')
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
@@ -41,7 +37,7 @@ export class GroupController {
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   getUserGroups(@Req() req: Request) {
     const userInfo = req.user;
-    return this.groupService.findByUserId(userInfo['id'])
+    return this.groupService.findByUserId(userInfo['id']);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -52,7 +48,7 @@ export class GroupController {
     return this.groupService.findByUserId(id);
   }
 
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Delete('groups/:id')
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')

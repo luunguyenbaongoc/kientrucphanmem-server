@@ -4,7 +4,6 @@ import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
-import { join } from 'path';
 import { UpdateProfileDto } from './dto';
 import { ProfileService } from '../profile/profile.service';
 
@@ -13,7 +12,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private profileService: ProfileService
+    private profileService: ProfileService,
   ) {}
 
   async findByPhone(phone: string): Promise<User | undefined> {
@@ -77,7 +76,10 @@ export class UserService {
     await this.userRepository.save(user);
   }
 
-  async createUserProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<Profile> {
+  async createUserProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<Profile> {
     const user = await this.findByIdAndCheckExist(userId);
     const newProfile = new Profile();
     newProfile.fullname = updateProfileDto.fullname;
@@ -88,19 +90,24 @@ export class UserService {
   }
 
   async updateUserProfile(
-    profileId: string, 
-    updateProfileDto: UpdateProfileDto
+    profileId: string,
+    updateProfileDto: UpdateProfileDto,
   ): Promise<Profile> {
     return this.profileService.updateProfile(profileId, updateProfileDto);
   }
 
   async getUserProfiles(userId: string): Promise<Profile[]> {
-    const user = await this.findByIdAndCheckExist(userId);
+    await this.findByIdAndCheckExist(userId);
     return this.profileService.findProfilesByUserId(userId);
   }
 
-  async uploadProfilePicture(filepath: string, profileId: string): Promise<string> {
-    await this.profileService.updateProfile(profileId, {avatar: filepath} as UpdateProfileDto);
+  async uploadProfilePicture(
+    filepath: string,
+    profileId: string,
+  ): Promise<string> {
+    await this.profileService.updateProfile(profileId, {
+      avatar: filepath,
+    } as UpdateProfileDto);
     return `File uploaded successfully: ${filepath}`;
   }
 }

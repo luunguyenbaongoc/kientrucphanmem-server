@@ -1,7 +1,4 @@
-import { 
-  Injectable, 
-  HttpStatus
-} from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { ErrorCode } from 'src/utils/error-code';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/entities';
@@ -24,13 +21,13 @@ export class ProfileService {
   }
 
   async updateProfile(
-    profileId: string, 
-    updateProfileDto: UpdateProfileDto
+    profileId: string,
+    updateProfileDto: UpdateProfileDto,
   ): Promise<Profile> {
     const profile = await this.profilesRepository.findOne({
       where: { id: profileId },
     });
-    
+
     if (!profile) {
       throw new AppError(
         HttpStatus.BAD_REQUEST,

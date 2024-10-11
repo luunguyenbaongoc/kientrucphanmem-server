@@ -96,7 +96,7 @@ export class AuthService {
       );
       newProfile.fullname = fullname;
       newProfile.user_id = addedUser.id;
-      const addedProfile = await queryRunner.manager.save(newProfile);
+      await queryRunner.manager.save(newProfile);
 
       await queryRunner.commitTransaction();
 

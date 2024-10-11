@@ -1,1 +1,1 @@
-export { CreateGroupResult } from './group.type'
+export { CreateGroupResult } from './group.type';

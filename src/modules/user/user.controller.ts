@@ -1,7 +1,7 @@
-import { 
-  Controller, 
-  Patch, 
-  Post, 
+import {
+  Controller,
+  Patch,
+  Post,
   Get,
   Body,
   Param,
@@ -9,16 +9,11 @@ import {
   HttpCode,
   UseGuards,
   HttpStatus,
-  UploadedFile, 
-  UseInterceptors
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { 
-  ApiTags, 
-  ApiBearerAuth, 
-  ApiConsumes,
-  ApiBody,
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UpdateProfileDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards';
@@ -36,41 +31,43 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   @Get('me/profiles/')
-  getUserProfiles(@Req() req: Request)
-  {
+  getUserProfiles(@Req() req: Request) {
     const userId = req.user['id'];
     return this.userService.getUserProfiles(userId);
   }
 
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   @Post('me/profiles/')
   createUserProfile(
     @Req() req: Request,
-    @Body() updateProfileDto: UpdateProfileDto)
-  {
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
     const userId = req.user['id'];
     return this.userService.createUserProfile(userId, updateProfileDto);
   }
 
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, callback) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype);
+        if (!isImage) {
+          return callback(new Error(`Không hỗ trợ file ${extname(file.originalname)}`), false);
+        }
+        callback(null, true);
       }
     }),
-    // fileFilter: (req, file, callback) => {
-    //   const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype);
-    //   if (!isImage) {
-    //     return callback(new Error(`Không hỗ trợ file ${extname(file.originalname)}`), false);
-    //   }
-    //   callback(null, true);
-    // }
-  }))
+  )
   @Post('me/profiles/:profileId/upload-image')
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
@@ -98,8 +95,8 @@ export class UserController {
   @Patch('me/profiles/:profileId')
   updateUserProfile(
     @Param('profileId') profileId: string,
-    @Body() updateProfileDto: UpdateProfileDto)
-  {
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
     return this.userService.updateUserProfile(profileId, updateProfileDto);
   }
 }

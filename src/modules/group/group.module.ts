@@ -6,10 +6,7 @@ import { UserModule } from '../user/user.module';
 import { Group } from 'src/entities';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Group]),
-    UserModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Group]), UserModule],
   exports: [GroupService],
   controllers: [GroupController],
   providers: [GroupService],

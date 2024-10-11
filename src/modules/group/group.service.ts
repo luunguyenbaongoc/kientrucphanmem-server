@@ -7,7 +7,6 @@ import { CreateGroupDto } from './dto';
 import { UserService } from '../user/user.service';
 import { CreateGroupResult } from './types';
 
-
 @Injectable()
 export class GroupService {
   constructor(
@@ -22,10 +21,9 @@ export class GroupService {
   }
 
   async createGroup(
-    leadId: string, 
-    createGroupDto: CreateGroupDto
-  ): Promise<CreateGroupResult | undefined> 
-  {    
+    leadId: string,
+    createGroupDto: CreateGroupDto,
+  ): Promise<CreateGroupResult | undefined> {
     const queryRunner = this.dataSource.createQueryRunner();
     try {
       const { name } = { ...createGroupDto };
@@ -55,7 +53,7 @@ export class GroupService {
         id: newGroup.id,
         name: addedGroup.name,
         group_lead: {
-          id: addedGroup.group_lead.id
+          id: addedGroup.group_lead.id,
         },
       };
     } catch (ex) {
@@ -79,7 +77,7 @@ export class GroupService {
   async findByUserId(userId: string): Promise<Group[] | undefined> {
     //TODO: just return enough information, not sensitive info
     return await this.groupRepository.find({
-      where: { group_lead: { id: userId } }
+      where: { group_lead: { id: userId } },
     });
   }
 

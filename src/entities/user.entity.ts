@@ -5,7 +5,7 @@ import {
   JoinColumn,
   OneToMany,
   ManyToMany,
-  JoinTable
+  JoinTable,
 } from 'typeorm';
 import { Group } from './group.entity';
 import { Profile } from './profile.entity';
@@ -32,13 +32,13 @@ export class User {
 
   @OneToMany(() => Profile, (Profile) => Profile.user, {
     eager: false,
-    cascade: true
+    cascade: true,
   })
   @JoinColumn()
   profile: Profile[];
 
   @ManyToMany(() => Group, (group) => group.members, {
-    eager: false
+    eager: false,
   })
   @JoinTable()
   groups: Group[];
