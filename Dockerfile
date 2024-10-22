@@ -1,4 +1,4 @@
-FROM node:18.15.0-alpine as development
+FROM node:18.15.0-alpine AS development
 WORKDIR /usr/src/app
 COPY  ["package.json", "package-lock.json", "./"]
 RUN npm i 

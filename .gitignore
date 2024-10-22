@@ -402,3 +402,6 @@ dist
 .serverless/**/*.zip
 config.yaml
 *.tar
+
+# Media files
+uploads/

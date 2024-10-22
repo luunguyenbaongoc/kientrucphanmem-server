@@ -8,6 +8,7 @@ import { APP_GUARD, APP_PIPE } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
 import { JwtAuthGuard } from './modules/auth/guards';
 import { ProfileModule } from './modules/profile/profile.module';
+import { GroupModule } from './modules/group/group.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ProfileModule } from './modules/profile/profile.module';
     AuthModule,
     PassportModule,
     ProfileModule,
+    GroupModule,
   ],
   controllers: [],
   providers: [
