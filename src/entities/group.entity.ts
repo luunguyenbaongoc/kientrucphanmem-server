@@ -2,11 +2,7 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  JoinColumn,
-  ManyToOne,
-  ManyToMany,
 } from 'typeorm';
-import { User } from './user.entity';
 
 @Entity('group')
 export class Group {
@@ -17,14 +13,17 @@ export class Group {
   name: string;
 
   @Column()
+  created_by: string;
+
+  @Column()
   created_date: Date;
 
-  @ManyToOne(() => User, (User) => User.id, {
-    eager: true,
-  })
-  @JoinColumn()
-  group_lead: User;
+  @Column()
+  latest_updated_by: string;
 
-  @ManyToMany(() => User, (user) => user.groups)
-  members: User[];
+  @Column()
+  latest_updated_date: Date;
+
+  @Column()
+  group_id_status: string;
 }

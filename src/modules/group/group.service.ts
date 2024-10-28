@@ -20,50 +20,50 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ name });
   }
 
-  async createGroup(
-    leadId: string,
-    createGroupDto: CreateGroupDto,
-  ): Promise<CreateGroupResult | undefined> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    try {
-      const { name } = { ...createGroupDto };
+  // async createGroup(
+  //   leadId: string,
+  //   createGroupDto: CreateGroupDto,
+  // ): Promise<CreateGroupResult | undefined> {
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   try {
+  //     const { name } = { ...createGroupDto };
 
-      const createGroupResult: CreateGroupResult = {
-        id: null,
-        name: null,
-        error: null,
-        group_lead: null,
-      };
+  //     const createGroupResult: CreateGroupResult = {
+  //       id: null,
+  //       name: null,
+  //       error: null,
+  //       group_lead: null,
+  //     };
 
-      const user: User = await this.userService.findByIdAndCheckExist(leadId);
+  //     const user: User = await this.userService.findByIdAndCheckExist(leadId);
 
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+  //     await queryRunner.connect();
+  //     await queryRunner.startTransaction();
 
-      const newGroup: Group = new Group();
-      newGroup.name = name;
-      newGroup.group_lead = user;
-      newGroup.created_date = new Date();
-      const addedGroup = await queryRunner.manager.save(newGroup);
+  //     const newGroup: Group = new Group();
+  //     newGroup.name = name;
+  //     newGroup.group_lead = user;
+  //     newGroup.created_date = new Date();
+  //     const addedGroup = await queryRunner.manager.save(newGroup);
 
-      await queryRunner.commitTransaction();
+  //     await queryRunner.commitTransaction();
 
-      return {
-        ...createGroupResult,
-        id: newGroup.id,
-        name: addedGroup.name,
-        group_lead: {
-          id: addedGroup.group_lead.id,
-        },
-      };
-    } catch (ex) {
-      Logger.error(ex);
-      await queryRunner.rollbackTransaction();
-      throw ex;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  //     return {
+  //       ...createGroupResult,
+  //       id: newGroup.id,
+  //       name: addedGroup.name,
+  //       group_lead: {
+  //         id: addedGroup.group_lead.id,
+  //       },
+  //     };
+  //   } catch (ex) {
+  //     Logger.error(ex);
+  //     await queryRunner.rollbackTransaction();
+  //     throw ex;
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   async saveGroup(group: Group): Promise<Group | undefined> {
     await this.groupRepository.save(group);
@@ -74,12 +74,12 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ id });
   }
 
-  async findByUserId(userId: string): Promise<Group[] | undefined> {
-    //TODO: just return enough information, not sensitive info
-    return await this.groupRepository.find({
-      where: { group_lead: { id: userId } },
-    });
-  }
+  // async findByUserId(userId: string): Promise<Group[] | undefined> {
+  //   //TODO: just return enough information, not sensitive info
+  //   return await this.groupRepository.find({
+  //     where: { group_lead: { id: userId } },
+  //   });
+  // }
 
   async deleteGroupById(groupId: string): Promise<void> {
     const group = await this.findById(groupId);

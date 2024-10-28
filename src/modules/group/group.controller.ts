@@ -22,31 +22,31 @@ import { CreateGroupDto } from './dto';
 export class GroupController {
   constructor(private groupService: GroupService) {}
 
-  @HttpCode(HttpStatus.CREATED)
-  @UseGuards(JwtAuthGuard)
-  @Post('groups')
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  createGroup(@Req() req: Request, @Body() createGroupDto: CreateGroupDto) {
-    const userInfo = req.user;
-    return this.groupService.createGroup(userInfo['id'], createGroupDto);
-  }
+  // @HttpCode(HttpStatus.CREATED)
+  // @UseGuards(JwtAuthGuard)
+  // @Post('groups')
+  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  // createGroup(@Req() req: Request, @Body() createGroupDto: CreateGroupDto) {
+  //   const userInfo = req.user;
+  //   return this.groupService.createGroup(userInfo['id'], createGroupDto);
+  // }
 
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @Get('groups')
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  getUserGroups(@Req() req: Request) {
-    const userInfo = req.user;
-    return this.groupService.findByUserId(userInfo['id']);
-  }
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(JwtAuthGuard)
+  // @Get('groups')
+  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  // getUserGroups(@Req() req: Request) {
+  //   const userInfo = req.user;
+  //   return this.groupService.findByUserId(userInfo['id']);
+  // }
 
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @Get('groups/:id')
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  getUserGroup(@Param('id') id: string) {
-    return this.groupService.findByUserId(id);
-  }
+  // @HttpCode(HttpStatus.OK)
+  // @UseGuards(JwtAuthGuard)
+  // @Get('groups/:id')
+  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  // getUserGroup(@Param('id') id: string) {
+  //   return this.groupService.findByUserId(id);
+  // }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)

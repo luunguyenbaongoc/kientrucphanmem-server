@@ -4,10 +4,7 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   OneToMany,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
-import { Group } from './group.entity';
 import { Profile } from './profile.entity';
 
 @Entity('user')
@@ -36,10 +33,4 @@ export class User {
   })
   @JoinColumn()
   profile: Profile[];
-
-  @ManyToMany(() => Group, (group) => group.members, {
-    eager: false,
-  })
-  @JoinTable()
-  groups: Group[];
 }
