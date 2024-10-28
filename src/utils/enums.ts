@@ -4,3 +4,8 @@ export enum FriendStatusCode {
   CANCELED = 'canceled',
   DELETED = 'deleted',
 }
+
+export enum GroupStatusCode {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}

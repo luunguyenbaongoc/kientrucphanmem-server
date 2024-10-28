@@ -13,6 +13,9 @@ export class Group {
   name: string;
 
   @Column()
+  code: string;
+
+  @Column()
   created_by: string;
 
   @Column()

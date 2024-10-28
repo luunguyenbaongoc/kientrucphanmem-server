@@ -323,6 +323,7 @@ export class AuthService {
 
       return true;
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
   }

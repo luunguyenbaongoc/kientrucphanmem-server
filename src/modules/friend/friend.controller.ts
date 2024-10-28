@@ -16,7 +16,7 @@ import { AddFriendDto, UpdateFriendDto } from './dto';
 export class FriendController {
   constructor(private friendService: FriendService) {}
 
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @Post('/')
   addFriend(@AuthUser() userId: string, @Body() addFriendDto: AddFriendDto) {
     return this.friendService.addFriend(userId, addFriendDto);

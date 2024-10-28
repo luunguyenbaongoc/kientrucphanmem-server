@@ -2,19 +2,14 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
-  UseGuards,
-  Req,
   Post,
-  Get,
   Body,
-  Param,
-  Delete,
+  Put,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
-import { Request } from 'express';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { GroupService } from './group.service';
-import { JwtAuthGuard } from '../auth/guards';
-import { CreateGroupDto } from './dto';
+import { AuthUser } from 'src/decorators';
+import { AddGroupDto, UpdateGroupDto } from './dto';
 
 @ApiTags('group')
 @ApiBearerAuth()
@@ -22,37 +17,26 @@ import { CreateGroupDto } from './dto';
 export class GroupController {
   constructor(private groupService: GroupService) {}
 
-  // @HttpCode(HttpStatus.CREATED)
-  // @UseGuards(JwtAuthGuard)
-  // @Post('groups')
-  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  // createGroup(@Req() req: Request, @Body() createGroupDto: CreateGroupDto) {
-  //   const userInfo = req.user;
-  //   return this.groupService.createGroup(userInfo['id'], createGroupDto);
-  // }
-
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(JwtAuthGuard)
-  // @Get('groups')
-  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  // getUserGroups(@Req() req: Request) {
-  //   const userInfo = req.user;
-  //   return this.groupService.findByUserId(userInfo['id']);
-  // }
-
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(JwtAuthGuard)
-  // @Get('groups/:id')
-  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  // getUserGroup(@Param('id') id: string) {
-  //   return this.groupService.findByUserId(id);
-  // }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
-  @Delete('groups/:id')
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  deleteUserGroup(@Param('id') id: string) {
-    return this.groupService.deleteGroupById(id);
+  @HttpCode(HttpStatus.CREATED)
+  @Post('/')
+  addGroup(@AuthUser() userId: string, @Body() addGroupDto: AddGroupDto) {
+    return this.groupService.addGroup(userId, addGroupDto);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('/')
+  updateGroup(
+    @AuthUser() userId: string,
+    @Body() updateGroupDto: UpdateGroupDto,
+  ) {
+    return this.groupService.updateGroup(userId, updateGroupDto);
+  }
+
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @UseGuards(JwtAuthGuard)
+  // @Delete('groups/:id')
+  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  // deleteUserGroup(@Param('id') id: string) {
+  //   return this.groupService.deleteGroupById(id);
+  // }
 }

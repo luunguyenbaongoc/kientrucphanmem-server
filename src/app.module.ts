@@ -10,6 +10,7 @@ import { JwtAuthGuard } from './modules/auth/guards';
 import { ProfileModule } from './modules/profile/profile.module';
 import { GroupModule } from './modules/group/group.module';
 import { FriendModule } from './modules/friend/friend.module';
+import { GroupMembersModule } from './modules/group_members/group_members.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { FriendModule } from './modules/friend/friend.module';
     ProfileModule,
     GroupModule,
     FriendModule,
+    GroupMembersModule,
   ],
   controllers: [],
   providers: [

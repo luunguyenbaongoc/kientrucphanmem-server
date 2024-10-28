@@ -32,17 +32,9 @@ export class FriendService {
   ): Promise<Friend | undefined> {
     try {
       await this.userService.findByIdAndCheckExist(userId);
-      const toUser = await this.userService.findByPhoneAndCheckExist(
-        addFriendDto.to_user_phone,
+      const toUser = await this.userService.findByIdAndCheckExist(
+        addFriendDto.user_id,
       );
-      const findFriend = await this.findFriendBy(userId, toUser.id);
-      if (findFriend) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.BAD_REQUEST,
-          `Người dùng số điện thoại ${addFriendDto.to_user_phone} đã có trong danh sách bạn bè`,
-        );
-      }
 
       const friendStatus =
         await this.friendStatusService.findByCodeAndCheckExist(

@@ -1,77 +1,101 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from 'src/entities';
-import { User } from 'src/entities';
-import { Repository, DataSource } from 'typeorm';
-import { CreateGroupDto } from './dto';
+import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
-import { CreateGroupResult } from './types';
+import { AppError } from 'src/utils/AppError';
+import { ErrorCode } from 'src/utils/error-code';
+import { AddGroupDto, UpdateGroupDto } from './dto';
+import { GroupStatusService } from '../group_status/group_status.service';
+import { GroupStatusCode } from 'src/utils/enums';
+import { genRandomCode } from 'src/helpers';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectRepository(Group)
     private groupRepository: Repository<Group>,
-    private readonly userService: UserService,
-    private dataSource: DataSource,
+    private userService: UserService,
+    private groupStatusService: GroupStatusService,
   ) {}
 
   async findByName(name: string): Promise<Group | undefined> {
     return await this.groupRepository.findOneBy({ name });
   }
 
-  // async createGroup(
-  //   leadId: string,
-  //   createGroupDto: CreateGroupDto,
-  // ): Promise<CreateGroupResult | undefined> {
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   try {
-  //     const { name } = { ...createGroupDto };
+  async addGroup(
+    userId: string,
+    addGroupDto: AddGroupDto,
+  ): Promise<Group | undefined> {
+    try {
+      await this.userService.findByIdAndCheckExist(userId);
 
-  //     const createGroupResult: CreateGroupResult = {
-  //       id: null,
-  //       name: null,
-  //       error: null,
-  //       group_lead: null,
-  //     };
+      const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
+        GroupStatusCode.ACTIVE,
+      );
 
-  //     const user: User = await this.userService.findByIdAndCheckExist(leadId);
+      const newGroup = new Group();
+      newGroup.name = addGroupDto.name;
+      newGroup.created_by = userId;
+      newGroup.group_id_status = groupStatus.id;
+      newGroup.code = genRandomCode();
+      await this.groupRepository.insert(newGroup);
 
-  //     await queryRunner.connect();
-  //     await queryRunner.startTransaction();
+      return await this.findByCode(newGroup.code);
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
 
-  //     const newGroup: Group = new Group();
-  //     newGroup.name = name;
-  //     newGroup.group_lead = user;
-  //     newGroup.created_date = new Date();
-  //     const addedGroup = await queryRunner.manager.save(newGroup);
+  async updateGroup(
+    userId: string,
+    updateGroupDto: UpdateGroupDto,
+  ): Promise<Group | undefined> {
+    try {
+      await this.userService.findByIdAndCheckExist(userId);
+      const group = await this.findByIdAndCheckExist(updateGroupDto.id);
+      const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
+        updateGroupDto.group_status_code,
+      );
 
-  //     await queryRunner.commitTransaction();
+      group.name = updateGroupDto.name;
+      group.group_id_status = groupStatus.id;
+      group.latest_updated_by = userId;
+      group.latest_updated_date = new Date();
 
-  //     return {
-  //       ...createGroupResult,
-  //       id: newGroup.id,
-  //       name: addedGroup.name,
-  //       group_lead: {
-  //         id: addedGroup.group_lead.id,
-  //       },
-  //     };
-  //   } catch (ex) {
-  //     Logger.error(ex);
-  //     await queryRunner.rollbackTransaction();
-  //     throw ex;
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
+      await this.groupRepository.save(group);
 
-  async saveGroup(group: Group): Promise<Group | undefined> {
-    await this.groupRepository.save(group);
-    return await this.groupRepository.findOneBy({ id: group.id });
+      return group;
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
   }
 
   async findById(id: string): Promise<Group | undefined> {
     return await this.groupRepository.findOneBy({ id });
+  }
+
+  async findByIdAndCheckExist(id: string): Promise<Group | undefined> {
+    try {
+      const group = await this.findById(id);
+      if (!group) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Group id ${id} không tồn tại`,
+        );
+      }
+      return group;
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async findByCode(code: string): Promise<Group | undefined> {
+    return await this.groupRepository.findOneBy({ code });
   }
 
   // async findByUserId(userId: string): Promise<Group[] | undefined> {
