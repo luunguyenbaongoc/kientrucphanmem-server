@@ -7,7 +7,7 @@ import { AddMembersDto } from './dto/add-members.dto';
 export class GroupMembersController {
   constructor(private groupMembersService: GroupMembersService) {}
 
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @Post('/')
   addGroup(@AuthUser() userId: string, @Body() addMembersDto: AddMembersDto) {
     return this.groupMembersService.addMembers(userId, addMembersDto);
