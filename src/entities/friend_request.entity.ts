@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('friend')
-export class Friend {
+@Entity('friend_request')
+export class FriendRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -15,5 +15,5 @@ export class Friend {
   created_date: Date;
 
   @Column()
-  deleted: boolean;
+  friend_request_status_id: string;
 }

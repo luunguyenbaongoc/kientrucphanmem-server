@@ -14,5 +14,6 @@ import { FriendStatusModule } from '../friend_status/friend_status.module';
   ],
   controllers: [FriendController],
   providers: [FriendService],
+  exports: [FriendService],
 })
 export class FriendModule {}

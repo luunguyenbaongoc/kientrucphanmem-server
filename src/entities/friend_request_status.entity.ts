@@ -1,19 +1,16 @@
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity('friend')
-export class Friend {
+@Entity('friend_request_status')
+export class FriendRequestStatus {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  from_user: string;
+  code: string;
 
   @Column()
-  to_user: string;
+  name: string;
 
   @Column()
   created_date: Date;
-
-  @Column()
-  deleted: boolean;
 }

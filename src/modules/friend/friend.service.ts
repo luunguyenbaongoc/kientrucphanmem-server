@@ -1,13 +1,11 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Friend } from 'src/entities';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AddFriendDto, UpdateFriendDto } from './dto';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
-import { FriendStatusService } from '../friend_status/friend_status.service';
-import { FriendStatusCode } from 'src/utils/enums';
 
 @Injectable()
 export class FriendService {
@@ -15,7 +13,7 @@ export class FriendService {
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
     private userService: UserService,
-    private friendStatusService: FriendStatusService,
+    private dataSource: DataSource,
   ) {}
 
   async findFriendBy(from_user: string, to_user: string) {
@@ -26,28 +24,18 @@ export class FriendService {
     return friend;
   }
 
-  async addFriend(
-    userId: string,
-    addFriendDto: AddFriendDto,
-  ): Promise<Friend | undefined> {
+  async addFriend(addFriendDto: AddFriendDto): Promise<Friend | undefined> {
     try {
-      await this.userService.findByIdAndCheckExist(userId);
-      const toUser = await this.userService.findByIdAndCheckExist(
-        addFriendDto.user_id,
-      );
-
-      const friendStatus =
-        await this.friendStatusService.findByCodeAndCheckExist(
-          FriendStatusCode.PENDING,
-        );
+      const { from_user, to_user } = addFriendDto;
+      await this.userService.findByIdAndCheckExist(from_user);
+      await this.userService.findByIdAndCheckExist(to_user);
 
       const newFriend = new Friend();
-      newFriend.from_user = userId;
-      newFriend.to_user = toUser.id;
-      newFriend.friend_status_id = friendStatus.id;
+      newFriend.from_user = from_user;
+      newFriend.to_user = to_user;
       await this.friendRepository.insert(newFriend);
 
-      return await this.findFriendBy(userId, toUser.id);
+      return await this.findFriendBy(from_user, to_user);
     } catch (ex) {
       Logger.error(ex);
       throw ex;
@@ -58,15 +46,21 @@ export class FriendService {
     return await this.friendRepository.findOneBy({ id });
   }
 
-  async listFriendByFriendStatus(statusCode: string): Promise<Friend[] | undefined> {
-    const friendStatus = await this.friendStatusService.findByCodeAndCheckExist(
-      statusCode,
-    );
-
-    return await this.friendRepository.findBy({
-      friend_status_id: friendStatus.id,
-    });
+  async listFriend(from_user: string): Promise<Friend[] | undefined> {
+    return await this.friendRepository.findBy({ from_user, deleted: false });
   }
+
+  // async listFriendByFriendStatus(
+  //   statusCode: string,
+  // ): Promise<Friend[] | undefined> {
+  //   const friendStatus = await this.friendStatusService.findByCodeAndCheckExist(
+  //     statusCode,
+  //   );
+
+  //   return await this.friendRepository.findBy({
+  //     friend_status_id: friendStatus.id,
+  //   });
+  // }
 
   async findByIdAndCheckExist(id: string): Promise<Friend | undefined> {
     try {
@@ -85,17 +79,64 @@ export class FriendService {
     }
   }
 
+  async findBy(
+    from_user: string,
+    to_user: string,
+  ): Promise<Friend | undefined> {
+    try {
+      return await this.friendRepository.findOneBy({ from_user, to_user });
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async deleteFriend(
+    from_user: string,
+    to_user: string,
+  ): Promise<boolean | undefined> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await this.userService.findByIdAndCheckExist(from_user);
+      await this.userService.findByIdAndCheckExist(to_user);
+
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const friend1 = await this.findBy(from_user, to_user);
+      const friend2 = await this.findBy(to_user, from_user);
+      if (!friend1 || !friend2) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Lỗi hệ thống`,
+        );
+      }
+
+      friend1.deleted = true;
+      friend2.deleted = true;
+      await queryRunner.manager.save(friend1);
+      await queryRunner.manager.save(friend2);
+
+      await queryRunner.commitTransaction();
+
+      return true;
+    } catch (ex) {
+      Logger.error(ex);
+      await queryRunner.rollbackTransaction();
+      throw ex;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async updateFriend(
     updateFriendDto: UpdateFriendDto,
   ): Promise<Friend | undefined> {
     try {
       const friend = await this.findByIdAndCheckExist(updateFriendDto.id);
-      const friendStatus =
-        await this.friendStatusService.findByCodeAndCheckExist(
-          updateFriendDto.friend_status_code,
-        );
 
-      friend.friend_status_id = friendStatus.id;
+      friend.deleted = updateFriendDto.deleted;
       await this.friendRepository.save(friend);
 
       return friend;
