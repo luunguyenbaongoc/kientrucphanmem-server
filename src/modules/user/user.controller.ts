@@ -14,7 +14,7 @@ import { UpdateProfileDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { Request } from 'express';
 
-@ApiTags('user')
+@ApiTags('User')
 @ApiBearerAuth()
 @Controller('user')
 export class UserController {
@@ -22,7 +22,7 @@ export class UserController {
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  @ApiConsumes('application/json')
   @Get('me/profiles/')
   getUserProfiles(@Req() req: Request) {
     const userId = req.user['id'];
@@ -31,7 +31,7 @@ export class UserController {
 
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  @ApiConsumes('application/json')
   @Post('me/profiles/')
   createUserProfile(
     @Req() req: Request,

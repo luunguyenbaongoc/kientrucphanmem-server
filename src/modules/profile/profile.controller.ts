@@ -19,7 +19,7 @@ import { extname } from 'path';
 import { ProfileService } from './profile.service';
 import { Profile } from 'src/entities';
 
-@ApiTags('profile')
+@ApiTags('Profile')
 @ApiBearerAuth()
 @Controller('profile')
 export class ProfileController {
@@ -69,7 +69,7 @@ export class ProfileController {
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  @ApiConsumes('application/json')
   @Patch('profiles/:profileId')
   updateUserProfile(
     @Param('profileId') profileId: string,

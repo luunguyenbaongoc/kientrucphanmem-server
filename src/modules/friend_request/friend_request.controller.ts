@@ -12,12 +12,15 @@ import { FriendRequestService } from './friend_request.service';
 import { AuthUser } from 'src/decorators';
 import { MakeRequestDto } from './dto';
 import { FriendRequestStatusCode } from 'src/utils/enums';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Friend Request')
 @Controller('friend-request')
 export class FriendRequestController {
   constructor(private friendRequestService: FriendRequestService) {}
 
   @HttpCode(HttpStatus.CREATED)
+  @ApiConsumes('application/json')
   @Post('/')
   makeRequest(
     @AuthUser() userId: string,

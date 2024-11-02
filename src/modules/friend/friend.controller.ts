@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { AuthUser } from 'src/decorators';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Friend')
 @Controller('friend')
 export class FriendController {
   constructor(private friendService: FriendService) {}
