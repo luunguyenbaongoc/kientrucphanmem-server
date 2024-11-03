@@ -9,12 +9,15 @@ import { AddGroupDto, UpdateGroupDto } from './dto';
 import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupStatusCode } from 'src/utils/enums';
 import { genRandomCode } from 'src/helpers';
+import { GroupMembers } from 'src/entities/group_member.entity';
+import { GroupMembersService } from '../group_members/group_members.service';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectRepository(Group)
     private groupRepository: Repository<Group>,
+    private groupMemberService: GroupMembersService,
     private userService: UserService,
     private groupStatusService: GroupStatusService,
   ) {}
@@ -39,6 +42,9 @@ export class GroupService {
       newGroup.created_by = userId;
       newGroup.group_id_status = groupStatus.id;
       newGroup.code = genRandomCode();
+      newGroup.created_date = new Date();
+      newGroup.latest_updated_by = userId;
+      
       await this.groupRepository.insert(newGroup);
 
       return await this.findByCode(newGroup.code);
@@ -98,12 +104,17 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ code });
   }
 
-  // async findByUserId(userId: string): Promise<Group[] | undefined> {
-  //   //TODO: just return enough information, not sensitive info
-  //   return await this.groupRepository.find({
-  //     where: { group_lead: { id: userId } },
-  //   });
-  // }
+  async getGroupsOfUser(userId: string): Promise<Group[] | undefined> {
+    const groupMembers: GroupMembers[] = await this.groupMemberService.findByUserId(userId);
+    const foundGroups: Group[] = [];
+    for (const member of groupMembers) {
+      const group = await this.findById(member.group_id);
+      if (group) {
+        foundGroups.push(group);
+      }
+    }
+    return foundGroups;
+  }
 
   async deleteGroupById(groupId: string): Promise<void> {
     const group = await this.findById(groupId);

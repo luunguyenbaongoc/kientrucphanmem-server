@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GroupMembers } from 'src/entities/group_member.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -14,6 +14,7 @@ export class GroupMembersService {
     private groupMembersRepository: Repository<GroupMembers>,
     private userService: UserService,
     private groupStatusService: GroupStatusService,
+    @Inject(forwardRef(() => GroupService))
     private groupService: GroupService,
     private dataSource: DataSource,
   ) {}
@@ -53,5 +54,12 @@ export class GroupMembersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async findByUserId(userId: string): Promise<GroupMembers[]> {
+    const groupMembers: GroupMembers[] = await this.groupMembersRepository.find({
+      where: { user_id: userId },
+    });
+    return groupMembers;
   }
 }

@@ -6,6 +6,7 @@ export class AddMembersDto {
   @IsString({ message: 'Không có group_id' })
   group_id: string;
 
+  @ApiProperty()
   @IsString({ message: 'Không có user_ids' })
   user_ids: string[];
 }

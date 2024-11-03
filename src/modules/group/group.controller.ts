@@ -5,6 +5,7 @@ import {
   Post,
   Body,
   Put,
+  Get,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { GroupService } from './group.service';
@@ -22,6 +23,12 @@ export class GroupController {
   @Post('/')
   addGroup(@AuthUser() userId: string, @Body() addGroupDto: AddGroupDto) {
     return this.groupService.addGroup(userId, addGroupDto);
+  }
+
+  @HttpCode(HttpStatus.CREATED)
+  @Get('/')
+  getGroupsOfUser(@AuthUser() userId: string) {
+    return this.groupService.getGroupsOfUser(userId);
   }
 
   @HttpCode(HttpStatus.OK)
