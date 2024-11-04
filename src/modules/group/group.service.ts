@@ -43,11 +43,15 @@ export class GroupService {
       newGroup.group_id_status = groupStatus.id;
       newGroup.code = genRandomCode();
       newGroup.created_date = new Date();
+      newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
       
+      // The user who created the group should be added as a member of this group.
       await this.groupRepository.insert(newGroup);
+      const createdGroup = await this.findByCode(newGroup.code);
+      this.groupMemberService.addMembers(userId, { group_id: createdGroup.id, user_ids: [ userId ]})
 
-      return await this.findByCode(newGroup.code);
+      return createdGroup;
     } catch (ex) {
       Logger.error(ex);
       throw ex;

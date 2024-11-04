@@ -25,7 +25,7 @@ export class GroupController {
     return this.groupService.addGroup(userId, addGroupDto);
   }
 
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @Get('/')
   getGroupsOfUser(@AuthUser() userId: string) {
     return this.groupService.getGroupsOfUser(userId);

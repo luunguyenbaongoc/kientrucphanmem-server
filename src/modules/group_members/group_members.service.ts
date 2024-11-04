@@ -32,6 +32,7 @@ export class GroupMembersService {
       await queryRunner.startTransaction();
 
       const members: GroupMembers[] = [];
+      const createdDate = new Date();
       for (let i = 0; i < addMembersDto.user_ids.length; i++) {
         await this.userService.findByIdAndCheckExist(addMembersDto.user_ids[i]);
 
@@ -39,7 +40,7 @@ export class GroupMembersService {
         newMember.group_id = addMembersDto.group_id;
         newMember.created_by = uerId;
         newMember.user_id = addMembersDto.user_ids[i];
-
+        newMember.created_date = createdDate;
         await queryRunner.manager.save(newMember);
         members.push(newMember);
       }
