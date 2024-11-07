@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { GroupMembers } from './group_members.entity';
 
 @Entity('group')
 export class Group {
@@ -25,4 +32,10 @@ export class Group {
 
   @Column()
   group_id_status: string;
+
+  @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
+    eager: false,
+  })
+  @JoinColumn()
+  group_members: GroupMembers[];
 }
