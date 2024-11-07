@@ -13,7 +13,7 @@ export class GroupMembersService {
     @InjectRepository(GroupMembers)
     private groupMembersRepository: Repository<GroupMembers>,
     private userService: UserService,
-    private groupStatusService: GroupStatusService,
+    private friendService: FriendService,
     @Inject(forwardRef(() => GroupService))
     private groupService: GroupService,
     private dataSource: DataSource,
@@ -34,7 +34,16 @@ export class GroupMembersService {
       const members: GroupMembers[] = [];
       const createdDate = new Date();
       for (let i = 0; i < addMembersDto.user_ids.length; i++) {
-        await this.userService.findByIdAndCheckExist(addMembersDto.user_ids[i]);
+        const id = addMembersDto.user_ids[i];
+        await this.userService.findByIdAndCheckExist(id);
+        const isFriend = await this.friendService.isFriend(uerId, id);
+        if (!isFriend) {
+          throw new AppError(
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.BAD_REQUEST,
+            `Người dùng id ${uerId} và id ${id} không phải là bạn bè`,
+          );
+        }
 
         const newMember = new GroupMembers();
         newMember.group_id = addMembersDto.group_id;
