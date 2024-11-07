@@ -30,9 +30,15 @@ export class FriendRequestController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('/list-pending')
-  listPendingRequest(@AuthUser() userId: string) {
-    return this.friendRequestService.listPendingRequest(userId);
+  @Get('/list-received')
+  listReceivedRequest(@AuthUser() userId: string) {
+    return this.friendRequestService.listReceivedRequest(userId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/list-sent')
+  listSentRequest(@AuthUser() userId: string) {
+    return this.friendRequestService.listSentRequest(userId);
   }
 
   @HttpCode(HttpStatus.OK)

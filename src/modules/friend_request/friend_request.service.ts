@@ -86,7 +86,7 @@ export class FriendRequestService {
     }
   }
 
-  async listPendingRequest(
+  async listReceivedRequest(
     user_id: string,
   ): Promise<FriendRequest[] | undefined> {
     try {
@@ -96,6 +96,22 @@ export class FriendRequestService {
         );
       return await this.friendRequestRepository.findBy({
         to_user: user_id,
+        friend_request_status_id: status.id,
+      });
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async listSentRequest(user_id: string): Promise<FriendRequest[] | undefined> {
+    try {
+      const status =
+        await this.friendRequestStatusService.findByCodeAndCheckExist(
+          FriendRequestStatusCode.PENDING,
+        );
+      return await this.friendRequestRepository.findBy({
+        from_user: user_id,
         friend_request_status_id: status.id,
       });
     } catch (ex) {
