@@ -9,7 +9,7 @@ import { AddGroupDto, UpdateGroupDto } from './dto';
 import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupStatusCode } from 'src/utils/enums';
 import { genRandomCode } from 'src/helpers';
-import { GroupMembers } from 'src/entities/group_member.entity';
+import { GroupMembers } from 'src/entities/group_members.entity';
 import { GroupMembersService } from '../group_members/group_members.service';
 
 @Injectable()
@@ -45,11 +45,14 @@ export class GroupService {
       newGroup.created_date = new Date();
       newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
-      
+
       // The user who created the group should be added as a member of this group.
       await this.groupRepository.insert(newGroup);
       const createdGroup = await this.findByCode(newGroup.code);
-      this.groupMemberService.addMembers(userId, { group_id: createdGroup.id, user_ids: [ userId ]})
+      this.groupMemberService.addMembers(userId, {
+        group_id: createdGroup.id,
+        user_ids: [userId],
+      });
 
       return createdGroup;
     } catch (ex) {
@@ -109,7 +112,8 @@ export class GroupService {
   }
 
   async getGroupsOfUser(userId: string): Promise<Group[] | undefined> {
-    const groupMembers: GroupMembers[] = await this.groupMemberService.findByUserId(userId);
+    const groupMembers: GroupMembers[] =
+      await this.groupMemberService.findByUserId(userId);
     const foundGroups: Group[] = [];
     for (const member of groupMembers) {
       const group = await this.findById(member.group_id);

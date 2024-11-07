@@ -7,14 +7,16 @@ import { UserModule } from '../user/user.module';
 import { GroupStatusModule } from '../group_status/group_status.module';
 import { GroupModule } from '../group/group.module';
 import { GroupStatus } from 'src/entities/group_status.entity';
-import { GroupMembers } from 'src/entities/group_member.entity';
+import { GroupMembers } from 'src/entities/group_members.entity';
+import { FriendModule } from '../friend/friend.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([GroupMembers, Group, GroupStatus]),
     UserModule,
     GroupStatusModule,
-    forwardRef(() => GroupModule)
+    FriendModule,
+    forwardRef(() => GroupModule),
   ],
   controllers: [GroupMembersController],
   providers: [GroupMembersService],

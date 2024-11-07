@@ -1,11 +1,20 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GroupMembers } from 'src/entities/group_member.entity';
+import { GroupMembers } from 'src/entities/group_members.entity';
 import { DataSource, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupService } from '../group/group.service';
 import { AddMembersDto } from './dto/add-members.dto';
+import { FriendService } from '../friend/friend.service';
+import { AppError } from 'src/utils/AppError';
+import { ErrorCode } from 'src/utils/error-code';
 
 @Injectable()
 export class GroupMembersService {
@@ -66,10 +75,24 @@ export class GroupMembersService {
     }
   }
 
-  async findByUserId(userId: string): Promise<GroupMembers[]> {
-    const groupMembers: GroupMembers[] = await this.groupMembersRepository.find({
-      where: { user_id: userId },
-    });
-    return groupMembers;
+  async findByUserId(userId: string): Promise<any> {
+    try {
+      const groupMembers: GroupMembers[] =
+        await this.groupMembersRepository.find({
+          where: { user_id: userId },
+          relations: ['group'],
+        });
+
+      if (!groupMembers) {
+        return null;
+      }
+      return {
+        groups: groupMembers,
+        count: groupMembers.length,
+      };
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
   }
 }

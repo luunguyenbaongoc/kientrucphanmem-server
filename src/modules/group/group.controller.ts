@@ -25,11 +25,11 @@ export class GroupController {
     return this.groupService.addGroup(userId, addGroupDto);
   }
 
-  @HttpCode(HttpStatus.OK)
-  @Get('/')
-  getGroupsOfUser(@AuthUser() userId: string) {
-    return this.groupService.getGroupsOfUser(userId);
-  }
+  // @HttpCode(HttpStatus.OK)
+  // @Get('/')
+  // getGroupsOfUser(@AuthUser() userId: string) {
+  //   return this.groupService.getGroupsOfUser(userId);
+  // }
 
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
