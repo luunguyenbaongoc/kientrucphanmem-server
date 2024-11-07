@@ -24,6 +24,14 @@ export class FriendService {
     return friend;
   }
 
+  async isFriend(from_user: string, to_user: string) {
+    const friend = this.findFriendBy(from_user, to_user);
+    if (friend) {
+      return true;
+    }
+    return false;
+  }
+
   async addFriend(addFriendDto: AddFriendDto): Promise<Friend | undefined> {
     try {
       const { from_user, to_user } = addFriendDto;
