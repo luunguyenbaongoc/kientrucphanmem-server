@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
 import { GroupMembersService } from './group_members.service';
@@ -28,5 +30,12 @@ export class GroupMembersController {
   @Get('/list-by-user')
   findByUserId(@AuthUser() userId: string) {
     return this.groupMembersService.findByUserId(userId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @Get('/list-by-group/:group_id')
+  findByGroupId(@Param('group_id', new ParseUUIDPipe()) group_id: string) {
+    return this.groupMembersService.findByGroupId(group_id);
   }
 }

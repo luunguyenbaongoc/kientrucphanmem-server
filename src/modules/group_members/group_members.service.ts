@@ -95,4 +95,25 @@ export class GroupMembersService {
       throw ex;
     }
   }
+
+  async findByGroupId(groupId: string): Promise<any> {
+    try {
+      const groupMembers: GroupMembers[] =
+        await this.groupMembersRepository.find({
+          where: { group_id: groupId },
+          relations: ['user'],
+        });
+
+      if (!groupMembers) {
+        return null;
+      }
+      return {
+        users: groupMembers,
+        count: groupMembers.length,
+      };
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
 }
