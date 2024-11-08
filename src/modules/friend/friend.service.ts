@@ -20,12 +20,13 @@ export class FriendService {
     const friend = this.friendRepository.findOneBy({
       from_user,
       to_user,
+      deleted: false,
     });
     return friend;
   }
 
   async isFriend(from_user: string, to_user: string) {
-    const friend = this.findFriendBy(from_user, to_user);
+    const friend = await this.findFriendBy(from_user, to_user);
     if (friend) {
       return true;
     }

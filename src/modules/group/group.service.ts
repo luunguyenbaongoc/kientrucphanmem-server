@@ -40,7 +40,7 @@ export class GroupService {
       const newGroup = new Group();
       newGroup.name = addGroupDto.name;
       newGroup.created_by = userId;
-      newGroup.group_id_status = groupStatus.id;
+      newGroup.group_status_id = groupStatus.id;
       newGroup.code = genRandomCode();
       newGroup.created_date = new Date();
       newGroup.latest_updated_date = new Date();
@@ -73,7 +73,7 @@ export class GroupService {
       );
 
       group.name = updateGroupDto.name;
-      group.group_id_status = groupStatus.id;
+      group.group_status_id = groupStatus.id;
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
 

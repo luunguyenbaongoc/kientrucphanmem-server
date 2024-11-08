@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AddMembersDto {
@@ -7,6 +7,6 @@ export class AddMembersDto {
   group_id: string;
 
   @ApiProperty()
-  @IsString({ message: 'Không có user_ids' })
+  @IsArray({ message: 'Không có user_ids' })
   user_ids: string[];
 }

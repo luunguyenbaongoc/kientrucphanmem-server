@@ -101,7 +101,7 @@ export class GroupMembersService {
       const groupMembers: GroupMembers[] =
         await this.groupMembersRepository.find({
           where: { group_id: groupId },
-          relations: ['user'],
+          relations: ['user.profile'],
         });
 
       if (!groupMembers) {
