@@ -31,7 +31,7 @@ export class Group {
   latest_updated_date: Date;
 
   @Column()
-  group_id_status: string;
+  group_status_id: string;
 
   @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
     eager: false,

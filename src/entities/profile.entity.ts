@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
 import { User } from './user.entity';
 
@@ -21,7 +22,7 @@ export class Profile {
   @Column()
   user_id: string;
 
-  @OneToMany(() => User, (User) => User.id, { eager: false })
+  @ManyToOne(() => User, (User) => User.id, { eager: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
