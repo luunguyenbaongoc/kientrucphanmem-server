@@ -183,12 +183,14 @@ export class FriendRequestService {
       friend1.from_user = acceptedRequest.from_user;
       friend1.to_user = acceptedRequest.to_user;
       friend1.created_date = new Date();
+      friend1.deleted = false;
       await queryRunner.manager.save(friend1);
 
       const friend2 = new Friend();
       friend2.from_user = acceptedRequest.to_user;
       friend2.to_user = acceptedRequest.from_user;
       friend2.created_date = new Date();
+      friend2.deleted = false;
       await queryRunner.manager.save(friend2);
 
       await queryRunner.commitTransaction();
