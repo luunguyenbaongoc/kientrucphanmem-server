@@ -52,6 +52,7 @@ export class FriendRequestService {
       newRequest.from_user = from_user.id;
       newRequest.to_user = to_user.id;
       newRequest.friend_request_status_id = status.id;
+      newRequest.created_date = new Date();
       await this.friendRequestRepository.insert(newRequest);
 
       return await this.findByContitions(
@@ -181,11 +182,13 @@ export class FriendRequestService {
       const friend1 = new Friend();
       friend1.from_user = acceptedRequest.from_user;
       friend1.to_user = acceptedRequest.to_user;
+      friend1.created_date = new Date();
       await queryRunner.manager.save(friend1);
 
       const friend2 = new Friend();
       friend2.from_user = acceptedRequest.to_user;
       friend2.to_user = acceptedRequest.from_user;
+      friend2.created_date = new Date();
       await queryRunner.manager.save(friend2);
 
       await queryRunner.commitTransaction();

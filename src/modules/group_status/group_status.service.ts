@@ -13,15 +13,15 @@ export class GroupStatusService {
     private groupStatusRepository: Repository<GroupStatus>,
   ) {}
 
-  // async onModuleInit() {
-  //   const roles = await this.groupStatusRepository.find();
-  //   if (roles.length === 0) {
-  //     await this.groupStatusRepository.save([
-  //       { code: GroupStatusCode.ACTIVE, name: 'Active', created_date: new Date(Date.now()) },
-  //       { code: GroupStatusCode.INACTIVE, name: 'Inactive', created_date: new Date(Date.now()) },
-  //     ]);
-  //   }
-  // }
+  async onModuleInit() {
+    const roles = await this.groupStatusRepository.find();
+    if (roles.length === 0) {
+      await this.groupStatusRepository.save([
+        { code: GroupStatusCode.ACTIVE, name: 'Active', created_date: new Date(Date.now()) },
+        { code: GroupStatusCode.INACTIVE, name: 'Inactive', created_date: new Date(Date.now()) },
+      ]);
+    }
+  }
 
   async findByCode(code: string): Promise<GroupStatus | undefined> {
     try {
