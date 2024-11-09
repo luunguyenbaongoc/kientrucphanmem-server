@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Group } from 'src/entities';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
@@ -20,6 +20,7 @@ export class GroupService {
     private groupMemberService: GroupMembersService,
     private userService: UserService,
     private groupStatusService: GroupStatusService,
+    private dataSource: DataSource,
   ) {}
 
   async findByName(name: string): Promise<Group | undefined> {
@@ -46,14 +47,29 @@ export class GroupService {
       newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
 
-      // The user who created the group should be added as a member of this group.
       await this.groupRepository.insert(newGroup);
       const createdGroup = await this.findByCode(newGroup.code);
-      this.groupMemberService.addMembers(userId, {
-        group_id: createdGroup.id,
-        user_ids: [userId],
-      });
+      const queryRunner = this.dataSource.createQueryRunner();
+      try {
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
 
+        const createdDate = new Date();
+        const newMember = new GroupMembers();
+        newMember.group_id = createdGroup.id;
+        newMember.created_by = userId;
+        newMember.user_id = userId;
+        newMember.created_date = createdDate;
+        await queryRunner.manager.save(newMember);
+
+        await queryRunner.commitTransaction();
+      } catch (ex) {
+        Logger.error(ex);
+        await queryRunner.rollbackTransaction();
+        throw ex;
+      } finally {
+        await queryRunner.release();
+      }
       return createdGroup;
     } catch (ex) {
       Logger.error(ex);
