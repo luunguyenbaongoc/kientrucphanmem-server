@@ -11,9 +11,10 @@ import {
 import { GroupMembersService } from './group_members.service';
 import { AuthUser } from 'src/decorators';
 import { AddMembersDto } from './dto/add-members.dto';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Group Member')
+@ApiBearerAuth()
 @Controller('group-members')
 export class GroupMembersController {
   constructor(private groupMembersService: GroupMembersService) {}

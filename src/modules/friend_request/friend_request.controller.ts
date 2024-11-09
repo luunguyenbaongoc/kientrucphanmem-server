@@ -12,9 +12,10 @@ import { FriendRequestService } from './friend_request.service';
 import { AuthUser } from 'src/decorators';
 import { MakeRequestDto } from './dto';
 import { FriendRequestStatusCode } from 'src/utils/enums';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Friend Request')
+@ApiBearerAuth()
 @Controller('friend-request')
 export class FriendRequestController {
   constructor(private friendRequestService: FriendRequestService) {}
