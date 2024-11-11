@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from './user.entity';
 
 @Entity('friend')
 export class Friend {
@@ -16,4 +23,8 @@ export class Friend {
 
   @Column()
   deleted: boolean;
+
+  @ManyToOne(() => User, (User) => User.id, { eager: false })
+  @JoinColumn({ name: 'to_user' })
+  to_user_profile: User;
 }

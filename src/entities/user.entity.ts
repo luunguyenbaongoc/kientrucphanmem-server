@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Profile } from './profile.entity';
 import { GroupMembers } from './group_members.entity';
+import { Friend } from './friend.entity';
 
 @Entity('user')
 export class User {
@@ -39,4 +40,10 @@ export class User {
   })
   @JoinColumn()
   group_members: GroupMembers[];
+
+  @OneToMany(() => Friend, (Friend) => Friend.to_user_profile, {
+    eager: false,
+  })
+  @JoinColumn()
+  to_user_friends: Friend[];
 }

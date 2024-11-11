@@ -56,7 +56,10 @@ export class FriendService {
   }
 
   async listFriend(from_user: string): Promise<Friend[] | undefined> {
-    return await this.friendRepository.findBy({ from_user, deleted: false });
+    return await this.friendRepository.find({
+      where: { from_user, deleted: false },
+      relations: ['to_user_profile.profile'],
+    });
   }
 
   // async listFriendByFriendStatus(
