@@ -9,6 +9,7 @@ import { FriendRequestStatusCode } from 'src/utils/enums';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { FriendService } from '../friend/friend.service';
 
 @Injectable()
 export class FriendRequestService {
@@ -18,6 +19,7 @@ export class FriendRequestService {
     private friendRequestStatusService: FriendRequestStatusService,
     private userService: UserService,
     private dataSource: DataSource,
+    private friendService: FriendService,
   ) {}
 
   async makeRequest(
@@ -30,6 +32,14 @@ export class FriendRequestService {
       const to_user = await this.userService.findByPhoneAndCheckExist(
         to_user_phone,
       );
+      const isFriend = await this.friendService.isFriend(userId, to_user.id);
+      if (isFriend) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Bạn và người dùng ${to_user_phone} đã là bạn bè`,
+        );
+      }
       const request = await this.findByContitions(
         from_user.id,
         to_user.id,
