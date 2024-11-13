@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Friend } from 'src/entities';
 import { DataSource, ILike, Repository } from 'typeorm';
-import { AddFriendDto, FindByTextdDto, UpdateFriendDto } from './dto';
+import { AddFriendDto, FindByTextDto, UpdateFriendDto } from './dto';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
@@ -172,7 +172,7 @@ export class FriendService {
 
   async findByText(
     userId: string,
-    findByTextDto: FindByTextdDto,
+    findByTextDto: FindByTextDto,
   ): Promise<any[] | undefined> {
     try {
       if (!findByTextDto.text) {

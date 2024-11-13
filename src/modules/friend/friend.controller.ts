@@ -12,7 +12,7 @@ import {
 import { FriendService } from './friend.service';
 import { AuthUser } from 'src/decorators';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { FindByTextdDto } from './dto';
+import { FindByTextDto } from './dto';
 
 @ApiTags('Friend')
 @ApiBearerAuth()
@@ -49,10 +49,7 @@ export class FriendController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/find-by-text')
-  findByText(
-    @AuthUser() userId: string,
-    @Body() findByTextDto: FindByTextdDto,
-  ) {
+  findByText(@AuthUser() userId: string, @Body() findByTextDto: FindByTextDto) {
     return this.friendService.findByText(userId, findByTextDto);
   }
 }
