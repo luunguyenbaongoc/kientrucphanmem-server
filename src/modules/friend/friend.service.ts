@@ -1,8 +1,8 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Friend } from 'src/entities';
-import { DataSource, Repository } from 'typeorm';
-import { AddFriendDto, UpdateFriendDto } from './dto';
+import { DataSource, ILike, Repository } from 'typeorm';
+import { AddFriendDto, FindByTextdDto, UpdateFriendDto } from './dto';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
@@ -16,17 +16,17 @@ export class FriendService {
     private dataSource: DataSource,
   ) {}
 
-  async findFriendBy(from_user: string, to_user: string) {
-    const friend = this.friendRepository.findOneBy({
-      from_user,
-      to_user,
-      deleted: false,
-    });
-    return friend;
-  }
+  // async findFriendBy(from_user: string, to_user: string) {
+  //   const friend = this.friendRepository.findOneBy({
+  //     from_user,
+  //     to_user,
+  //     deleted: false,
+  //   });
+  //   return friend;
+  // }
 
   async isFriend(from_user: string, to_user: string) {
-    const friend = await this.findFriendBy(from_user, to_user);
+    const friend = await this.findBy(from_user, to_user);
     if (friend) {
       return true;
     }
@@ -44,7 +44,7 @@ export class FriendService {
       newFriend.to_user = to_user;
       await this.friendRepository.insert(newFriend);
 
-      return await this.findFriendBy(from_user, to_user);
+      return await this.findBy(from_user, to_user);
     } catch (ex) {
       Logger.error(ex);
       throw ex;
@@ -59,6 +59,13 @@ export class FriendService {
     return await this.friendRepository.find({
       where: { from_user, deleted: false },
       relations: ['to_user_profile.profile'],
+      select: {
+        id: true,
+        to_user_profile: {
+          id: true,
+          profile: { fullname: true, avatar: true, id: true },
+        },
+      },
     });
   }
 
@@ -94,9 +101,14 @@ export class FriendService {
   async findBy(
     from_user: string,
     to_user: string,
+    deleted: boolean = false,
   ): Promise<Friend | undefined> {
     try {
-      return await this.friendRepository.findOneBy({ from_user, to_user });
+      return await this.friendRepository.findOneBy({
+        from_user,
+        to_user,
+        deleted,
+      });
     } catch (ex) {
       Logger.error(ex);
       throw ex;
@@ -152,6 +164,34 @@ export class FriendService {
       await this.friendRepository.save(friend);
 
       return friend;
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async findByText(
+    userId: string,
+    findByTextDto: FindByTextdDto,
+  ): Promise<any[] | undefined> {
+    try {
+      return await this.friendRepository.find({
+        where: {
+          from_user: userId,
+          to_user_profile: {
+            profile: { fullname: ILike(`%${findByTextDto.text}%`) },
+          },
+          deleted: false,
+        },
+        relations: ['to_user_profile.profile'],
+        select: {
+          id: true,
+          to_user_profile: {
+            id: true,
+            profile: { fullname: true, avatar: true, id: true },
+          },
+        },
+      });
     } catch (ex) {
       Logger.error(ex);
       throw ex;

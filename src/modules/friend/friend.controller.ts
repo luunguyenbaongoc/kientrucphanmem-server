@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,10 +7,12 @@ import {
   HttpStatus,
   Param,
   ParseUUIDPipe,
+  Post,
 } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { AuthUser } from 'src/decorators';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FindByTextdDto } from './dto';
 
 @ApiTags('Friend')
 @ApiBearerAuth()
@@ -42,5 +45,14 @@ export class FriendController {
     @Param('delete_user_id', new ParseUUIDPipe()) delete_user_id: string,
   ) {
     return this.friendService.deleteFriend(userId, delete_user_id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/find-by-text')
+  findByText(
+    @AuthUser() userId: string,
+    @Body() findByTextDto: FindByTextdDto,
+  ) {
+    return this.friendService.findByText(userId, findByTextDto);
   }
 }
