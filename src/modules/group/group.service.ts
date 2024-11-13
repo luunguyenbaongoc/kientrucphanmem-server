@@ -11,6 +11,8 @@ import { GroupStatusCode } from 'src/utils/enums';
 import { genRandomCode } from 'src/helpers';
 import { GroupMembers } from 'src/entities/group_members.entity';
 import { GroupMembersService } from '../group_members/group_members.service';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class GroupService {
@@ -46,6 +48,10 @@ export class GroupService {
       newGroup.created_date = new Date();
       newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
+      newGroup.avatar = fs.readFileSync(
+        path.join(__dirname, '../../images/default-avatar.jpg'),
+        'base64',
+      );
 
       await this.groupRepository.insert(newGroup);
       const createdGroup = await this.findByCode(newGroup.code);
@@ -90,6 +96,7 @@ export class GroupService {
 
       group.name = updateGroupDto.name;
       group.group_status_id = groupStatus.id;
+      group.avatar = updateGroupDto.avatar;
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
 

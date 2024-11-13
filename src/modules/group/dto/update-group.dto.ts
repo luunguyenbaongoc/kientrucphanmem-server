@@ -11,6 +11,10 @@ export class UpdateGroupDto {
   name: string;
 
   @ApiProperty()
+  @IsString({ message: 'Không có avatar' })
+  avatar: string;
+
+  @ApiProperty()
   @IsString({ message: 'Không có group status code' })
   group_status_code: string;
 }
