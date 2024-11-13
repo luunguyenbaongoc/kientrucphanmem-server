@@ -8,6 +8,7 @@ import {
 import { Profile } from './profile.entity';
 import { GroupMembers } from './group_members.entity';
 import { Friend } from './friend.entity';
+import { FriendRequest } from './friend_request.entity';
 
 @Entity('user')
 export class User {
@@ -46,4 +47,24 @@ export class User {
   })
   @JoinColumn()
   to_user_friends: Friend[];
+
+  @OneToMany(
+    () => FriendRequest,
+    (FriendRequest) => FriendRequest.to_user_profile,
+    {
+      eager: false,
+    },
+  )
+  @JoinColumn()
+  to_user_friend_requests: FriendRequest[];
+
+  @OneToMany(
+    () => FriendRequest,
+    (FriendRequest) => FriendRequest.from_user_profile,
+    {
+      eager: false,
+    },
+  )
+  @JoinColumn()
+  from_user_friend_requests: FriendRequest[];
 }

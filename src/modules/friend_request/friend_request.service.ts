@@ -95,9 +95,19 @@ export class FriendRequestService {
         await this.friendRequestStatusService.findByCodeAndCheckExist(
           FriendRequestStatusCode.PENDING,
         );
-      return await this.friendRequestRepository.findBy({
-        to_user: user_id,
-        friend_request_status_id: status.id,
+      return await this.friendRequestRepository.find({
+        where: {
+          to_user: user_id,
+          friend_request_status_id: status.id,
+        },
+        relations: ['from_user_profile.profile'],
+        select: {
+          id: true,
+          from_user_profile: {
+            id: true,
+            profile: { fullname: true, avatar: true, id: true },
+          },
+        },
       });
     } catch (ex) {
       Logger.error(ex);
@@ -111,9 +121,19 @@ export class FriendRequestService {
         await this.friendRequestStatusService.findByCodeAndCheckExist(
           FriendRequestStatusCode.PENDING,
         );
-      return await this.friendRequestRepository.findBy({
-        from_user: user_id,
-        friend_request_status_id: status.id,
+      return await this.friendRequestRepository.find({
+        where: {
+          from_user: user_id,
+          friend_request_status_id: status.id,
+        },
+        relations: ['to_user_profile.profile'],
+        select: {
+          id: true,
+          to_user_profile: {
+            id: true,
+            profile: { fullname: true, avatar: true, id: true },
+          },
+        },
       });
     } catch (ex) {
       Logger.error(ex);
