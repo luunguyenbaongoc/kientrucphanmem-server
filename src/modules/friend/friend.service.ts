@@ -175,6 +175,9 @@ export class FriendService {
     findByTextDto: FindByTextdDto,
   ): Promise<any[] | undefined> {
     try {
+      if (!findByTextDto.text) {
+        return await this.listFriend(userId);
+      }
       return await this.friendRepository.find({
         where: {
           from_user: userId,
