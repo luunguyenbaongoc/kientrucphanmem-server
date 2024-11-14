@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GroupMembers } from 'src/entities/group_members.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupService } from '../group/group.service';
@@ -15,6 +15,7 @@ import { AddMembersDto } from './dto/add-members.dto';
 import { FriendService } from '../friend/friend.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
+import { FindByUserDto } from './dto';
 
 @Injectable()
 export class GroupMembersService {
@@ -75,12 +76,24 @@ export class GroupMembersService {
     }
   }
 
-  async findByUserId(userId: string): Promise<any> {
+  async findByUserId(
+    userId: string,
+    findByUserDto: FindByUserDto,
+  ): Promise<any> {
     try {
+      const searchText = findByUserDto.searchText || '';
       const groupMembers: GroupMembers[] =
         await this.groupMembersRepository.find({
-          where: { user_id: userId },
+          where: {
+            user_id: userId,
+            group: { name: ILike(`%${searchText}%`) },
+          },
           relations: ['group'],
+          select: {
+            user_id: true,
+            group_id: true,
+            group: { id: true, name: true, avatar: true },
+          },
         });
 
       if (!groupMembers) {

@@ -134,19 +134,6 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ code });
   }
 
-  async getGroupsOfUser(userId: string): Promise<Group[] | undefined> {
-    const groupMembers: GroupMembers[] =
-      await this.groupMemberService.findByUserId(userId);
-    const foundGroups: Group[] = [];
-    for (const member of groupMembers) {
-      const group = await this.findById(member.group_id);
-      if (group) {
-        foundGroups.push(group);
-      }
-    }
-    return foundGroups;
-  }
-
   async deleteGroupById(groupId: string): Promise<void> {
     const group = await this.findById(groupId);
     if (!group) {

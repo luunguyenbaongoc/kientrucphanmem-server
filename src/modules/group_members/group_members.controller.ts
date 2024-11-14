@@ -12,6 +12,7 @@ import { GroupMembersService } from './group_members.service';
 import { AuthUser } from 'src/decorators';
 import { AddMembersDto } from './dto/add-members.dto';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FindByUserDto } from './dto';
 
 @ApiTags('Group Member')
 @ApiBearerAuth()
@@ -28,9 +29,12 @@ export class GroupMembersController {
 
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
-  @Get('/list-by-user')
-  findByUserId(@AuthUser() userId: string) {
-    return this.groupMembersService.findByUserId(userId);
+  @Post('/list-by-user')
+  findByUserId(
+    @AuthUser() userId: string,
+    @Body() findByUserDto: FindByUserDto,
+  ) {
+    return this.groupMembersService.findByUserId(userId, findByUserDto);
   }
 
   @HttpCode(HttpStatus.OK)
