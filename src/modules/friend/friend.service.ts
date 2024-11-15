@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Friend } from 'src/entities';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { DataSource, FindOperator, ILike, Repository } from 'typeorm';
 import { AddFriendDto, FindByTextDto, UpdateFriendDto } from './dto';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
@@ -178,19 +178,23 @@ export class FriendService {
       if (!findByTextDto.text) {
         return await this.listFriend(userId);
       }
+      const phoneRegex = /^\d+$/;
+      const isPhoneText: boolean = phoneRegex.test(findByTextDto.text);
+      const findOperator: FindOperator<string> = ILike(`%${findByTextDto.text}%`);
+      const profileQuery = isPhoneText ? { phone: findOperator }: { profile: { fullname: findOperator } };
+      console.log(profileQuery);
       return await this.friendRepository.find({
         where: {
           from_user: userId,
-          to_user_profile: {
-            profile: { fullname: ILike(`%${findByTextDto.text}%`) },
-          },
+          to_user_profile: profileQuery,
           deleted: false,
         },
-        relations: ['to_user_profile.profile'],
+        relations: ['to_user_profile', 'to_user_profile.profile'],
         select: {
           id: true,
           to_user_profile: {
             id: true,
+            phone: isPhoneText,
             profile: { fullname: true, avatar: true, id: true },
           },
         },
