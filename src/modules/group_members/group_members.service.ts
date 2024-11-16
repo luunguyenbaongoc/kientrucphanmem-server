@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GroupMembers } from 'src/entities/group_members.entity';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { DataSource, ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupService } from '../group/group.service';
@@ -17,6 +17,7 @@ import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
+import { RemoveMembersDto } from './dto/remove-members.dto';
 
 @Injectable()
 export class GroupMembersService {
@@ -68,6 +69,38 @@ export class GroupMembersService {
       await queryRunner.commitTransaction();
 
       return members;
+    } catch (ex) {
+      Logger.error(ex);
+      await queryRunner.rollbackTransaction();
+      throw ex;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async removeMembers(
+    userId: string,
+    removeMembersDto: RemoveMembersDto,
+  ): Promise<boolean> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await this.userService.findByIdAndCheckExist(userId);
+      const isGroupAdmin = await this.checkUserIsGroupAdmin(userId, removeMembersDto.group_id);
+      if (!isGroupAdmin) {
+        return false;
+      }
+      if (removeMembersDto.user_ids.indexOf(userId) !== -1) {
+        // Can't delete admin user
+        return false;
+      }
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      await this.groupMembersRepository.delete({
+        group_id: removeMembersDto.group_id,
+        user_id: In(removeMembersDto.user_ids.filter(id => id !== userId)),
+      });
+      await queryRunner.commitTransaction();
+      return true;
     } catch (ex) {
       Logger.error(ex);
       await queryRunner.rollbackTransaction();
@@ -132,5 +165,10 @@ export class GroupMembersService {
       Logger.error(ex);
       throw ex;
     }
+  }
+
+  async checkUserIsGroupAdmin(userId: string, groupId: string): Promise<boolean> {
+    const group = await this.groupService.findByIdAndCheckExist(groupId);
+    return group.created_by === userId;
   }
 }
