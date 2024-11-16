@@ -180,8 +180,12 @@ export class FriendService {
       }
       const phoneRegex = /^\d+$/;
       const isPhoneText: boolean = phoneRegex.test(findByTextDto.text);
-      const findOperator: FindOperator<string> = ILike(`%${findByTextDto.text}%`);
-      const profileQuery = isPhoneText ? { phone: findOperator }: { profile: { fullname: findOperator } };
+      const findOperator: FindOperator<string> = ILike(
+        `%${findByTextDto.text}%`,
+      );
+      const profileQuery = isPhoneText
+        ? { phone: findOperator }
+        : { profile: { fullname: findOperator } };
       return await this.friendRepository.find({
         where: {
           from_user: userId,

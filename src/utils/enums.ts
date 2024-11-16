@@ -1,8 +1,3 @@
-export enum FriendStatusCode {
-  ACCEPTED = 'accepted',
-  DELETED = 'deleted',
-}
-
 export enum GroupStatusCode {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
