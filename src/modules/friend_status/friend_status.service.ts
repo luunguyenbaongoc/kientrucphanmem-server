@@ -2,7 +2,6 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FriendStatus } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
-import { FriendStatusCode } from 'src/utils/enums';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
 
@@ -12,17 +11,6 @@ export class FriendStatusService {
     @InjectRepository(FriendStatus)
     private friendStatusRepository: Repository<FriendStatus>,
   ) {}
-
-  async onModuleInit() {
-    const statuses = await this.friendStatusRepository.find();
-    if (statuses.length === 0) {
-      // only create new status if status is not found in the database.
-      await this.friendStatusRepository.save([
-        { code: FriendStatusCode.ACCEPTED, name: 'Accepted', created_date: new Date(Date.now()) },
-        { code: FriendStatusCode.DELETED, name: 'Deleted', created_date: new Date(Date.now()) },
-      ]);
-    }
-  }
 
   async findByCode(code: string): Promise<FriendStatus | undefined> {
     try {

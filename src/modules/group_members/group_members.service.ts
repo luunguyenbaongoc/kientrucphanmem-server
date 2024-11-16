@@ -16,6 +16,7 @@ import { FriendService } from '../friend/friend.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { FindByUserDto } from './dto';
+import { GroupStatusCode } from 'src/utils/enums';
 
 @Injectable()
 export class GroupMembersService {
@@ -86,7 +87,10 @@ export class GroupMembersService {
         await this.groupMembersRepository.find({
           where: {
             user_id: userId,
-            group: { name: ILike(`%${searchText}%`) },
+            group: {
+              code: GroupStatusCode.ACTIVE,
+              name: ILike(`%${searchText}%`),
+            },
           },
           relations: ['group'],
           select: {
