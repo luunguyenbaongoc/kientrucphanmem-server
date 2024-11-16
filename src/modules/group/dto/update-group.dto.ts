@@ -17,4 +17,8 @@ export class UpdateGroupDto {
   @ApiProperty()
   @IsString({ message: 'Không có group status code' })
   group_status_code: string;
+
+  @ApiProperty()
+  @IsString({ message: 'Không có mô tả' })
+  description: string;
 }

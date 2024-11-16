@@ -5,4 +5,7 @@ export class AddGroupDto {
   @ApiProperty()
   @IsString({ message: 'Không có tên nhóm' })
   name: string;
+
+  @ApiProperty()
+  description: string;
 }

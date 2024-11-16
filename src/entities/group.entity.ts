@@ -36,6 +36,9 @@ export class Group {
   @Column({ nullable: true })
   avatar: string;
 
+  @Column({ nullable: true })
+  description: string;
+
   @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
     eager: false,
   })

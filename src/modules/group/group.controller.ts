@@ -68,7 +68,7 @@ export class GroupController {
       }
     }),
   )
-  @Post('/:groupId/upload-image')
+  @Post(':groupId/upload-image')
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({

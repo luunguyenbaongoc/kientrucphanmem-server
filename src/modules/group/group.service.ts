@@ -94,11 +94,12 @@ export class GroupService {
         updateGroupDto.group_status_code,
       );
 
-      group.name = updateGroupDto.name;
+      group.name = updateGroupDto.name || group.name;
       group.group_status_id = groupStatus.id;
-      group.avatar = updateGroupDto.avatar;
+      group.avatar = updateGroupDto.avatar || group.avatar;
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
+      group.description = updateGroupDto.description || group.description;
 
       await this.groupRepository.save(group);
 
