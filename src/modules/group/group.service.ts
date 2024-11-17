@@ -135,29 +135,48 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ code });
   }
 
-  async terminateGroup(groupId: string, userId: string): Promise<void> {
+  async deleteGroupById(
+    userId: string,
+    groupId: string,
+  ): Promise<Group | undefined> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
-      const isAdmin: boolean = await this.checkUserIsGroupAdmin(userId, groupId);
-      if (!isAdmin) return;
       const group = await this.findByIdAndCheckExist(groupId);
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
-      await queryRunner.manager.remove(group);
+      const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
+        GroupStatusCode.INACTIVE,
+      );
+
+      group.group_status_id = groupStatus.id;
+      group.latest_updated_by = userId;
+      group.latest_updated_date = new Date();
+      await queryRunner.manager.save(group);
+
+      const members = await this.groupMemberService.findByGroupId(group.id);
+      for (let i = 0; i < members.count; i++) {
+        const { user_id, group_id } = members.users[i];
+        await queryRunner.manager.delete(GroupMembers, { user_id, group_id });
+      }
+
       await queryRunner.commitTransaction();
-    }
-    catch (ex) {
+
+      await this.groupRepository.delete(groupId);
+
+      return group;
+    } catch (ex) {
       Logger.error(ex);
       await queryRunner.rollbackTransaction();
       throw ex;
-    }
-    finally {
+    } finally {
       await queryRunner.release();
     }
-    return;
   }
 
-  async checkUserIsGroupAdmin(userId: string, groupId: string): Promise<boolean> {
+  async checkUserIsGroupAdmin(
+    userId: string,
+    groupId: string,
+  ): Promise<boolean> {
     const group = await this.findByIdAndCheckExist(groupId);
     return group.created_by === userId;
   }

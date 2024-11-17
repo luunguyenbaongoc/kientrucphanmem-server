@@ -10,10 +10,10 @@ import { GroupMembersModule } from '../group_members/group_members.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Group, GroupStatus]), 
-    forwardRef(() => GroupMembersModule),
-    UserModule, 
-    GroupStatusModule
+    TypeOrmModule.forFeature([Group, GroupStatus]),
+    GroupMembersModule,
+    UserModule,
+    GroupStatusModule,
   ],
   exports: [GroupService],
   controllers: [GroupController],

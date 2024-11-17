@@ -9,14 +9,9 @@ import {
   UploadedFile,
   UseInterceptors,
   Param,
-  Delete
+  Delete,
 } from '@nestjs/common';
-import { 
-  ApiTags, 
-  ApiBearerAuth, 
-  ApiConsumes,
-  ApiBody
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { GroupService } from './group.service';
 import { AuthUser } from 'src/decorators';
 import { AddGroupDto, UpdateGroupDto } from './dto';
@@ -61,12 +56,17 @@ export class GroupController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype);
+        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(
+          file.mimetype,
+        );
         if (!isImage) {
-          return callback(new Error(`Không hỗ trợ file ${extname(file.originalname)}`), false);
+          return callback(
+            new Error(`Không hỗ trợ file ${extname(file.originalname)}`),
+            false,
+          );
         }
         callback(null, true);
-      }
+      },
     }),
   )
   @Post(':groupId/upload-image')
@@ -88,13 +88,17 @@ export class GroupController {
     @UploadedFile() file: Express.Multer.File,
     @Param('groupId') groupId: string,
   ): Promise<Group> {
-    return this.groupService.updateGroup(userId, { id: groupId, avatar: file.path } as UpdateGroupDto);
+    return this.groupService.updateGroup(userId, {
+      id: groupId,
+      avatar: file.path,
+    } as UpdateGroupDto);
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  @Delete(':groupId')
-  terminateGroup(@AuthUser() userId: string, @Param('groupId') groupId: string) {
-    return this.groupService.terminateGroup(groupId, userId);
+  @Delete('/:id')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
+  deleteUserGroup(@AuthUser() userId: string, @Param('id') id: string) {
+    return this.groupService.deleteGroupById(userId, id);
   }
 }

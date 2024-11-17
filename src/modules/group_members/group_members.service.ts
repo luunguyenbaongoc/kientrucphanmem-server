@@ -18,6 +18,7 @@ import { ErrorCode } from 'src/utils/error-code';
 import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
 import { RemoveMembersDto } from './dto/remove-members.dto';
+import { FindByGroupResult } from './types';
 
 @Injectable()
 export class GroupMembersService {
@@ -83,9 +84,14 @@ export class GroupMembersService {
     removeMembersDto: RemoveMembersDto,
   ): Promise<boolean> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       await this.userService.findByIdAndCheckExist(userId);
-      const isGroupAdmin = await this.groupService.checkUserIsGroupAdmin(userId, removeMembersDto.group_id);
+      const isGroupAdmin = await this.groupService.checkUserIsGroupAdmin(
+        userId,
+        removeMembersDto.group_id,
+      );
       if (!isGroupAdmin) {
         return false;
       }
@@ -93,11 +99,10 @@ export class GroupMembersService {
         // Can't delete admin user
         return false;
       }
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+
       await this.groupMembersRepository.delete({
         group_id: removeMembersDto.group_id,
-        user_id: In(removeMembersDto.user_ids.filter(id => id !== userId)),
+        user_id: In(removeMembersDto.user_ids.filter((id) => id !== userId)),
       });
       await queryRunner.commitTransaction();
       return true;
@@ -146,7 +151,7 @@ export class GroupMembersService {
     }
   }
 
-  async findByGroupId(groupId: string): Promise<any> {
+  async findByGroupId(groupId: string): Promise<FindByGroupResult | undefined> {
     try {
       const groupMembers: GroupMembers[] =
         await this.groupMembersRepository.find({

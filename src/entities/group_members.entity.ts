@@ -16,7 +16,7 @@ export class GroupMembers {
   @Column()
   created_date: Date;
 
-  @ManyToOne(() => Group, (Group) => Group.id, { eager: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Group, (Group) => Group.id, { eager: false })
   @JoinColumn({ name: 'group_id' })
   group: Group;
 

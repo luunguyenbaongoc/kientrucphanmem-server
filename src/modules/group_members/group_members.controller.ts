@@ -31,7 +31,10 @@ export class GroupMembersController {
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @Post('/remove-members')
-  addMembers(@AuthUser() userId: string, @Body() removeMembersDto: RemoveMembersDto) {
+  addMembers(
+    @AuthUser() userId: string,
+    @Body() removeMembersDto: RemoveMembersDto,
+  ) {
     return this.groupMembersService.removeMembers(userId, removeMembersDto);
   }
 
