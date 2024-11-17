@@ -1,4 +1,4 @@
-import { 
+import {
   Controller,
   HttpCode,
   HttpStatus,
@@ -37,12 +37,17 @@ export class ProfileController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype);
+        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(
+          file.mimetype,
+        );
         if (!isImage) {
-          return callback(new Error(`Không hỗ trợ file ${extname(file.originalname)}`), false);
+          return callback(
+            new Error(`Không hỗ trợ file ${extname(file.originalname)}`),
+            false,
+          );
         }
         callback(null, true);
-      }
+      },
     }),
   )
   @Post('profiles/:profileId/upload-image')
@@ -63,8 +68,9 @@ export class ProfileController {
     @UploadedFile() file: Express.Multer.File,
     @Param('profileId') profileId: string,
   ): Promise<Profile> {
-    return this.profileService.updateProfile(
-      profileId, { avatar: file.path } as UpdateProfileDto);
+    return this.profileService.updateProfile(profileId, {
+      avatar: file.path,
+    } as UpdateProfileDto);
   }
 
   @HttpCode(HttpStatus.OK)

@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GroupMembers } from 'src/entities/group_members.entity';
 import { DataSource, ILike, In, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
-import { GroupStatusService } from '../group_status/group_status.service';
 import { GroupService } from '../group/group.service';
 import { AddMembersDto } from './dto/add-members.dto';
 import { FriendService } from '../friend/friend.service';
