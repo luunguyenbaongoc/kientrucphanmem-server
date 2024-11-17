@@ -144,6 +144,14 @@ export class GroupService {
     await queryRunner.startTransaction();
     try {
       const group = await this.findByIdAndCheckExist(groupId);
+      const isOnwer = await this.checkUserIsGroupAdmin(userId, groupId);
+      if (!isOnwer) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Bạn không có quyền xóa group ${groupId}`,
+        );
+      }
       const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
         GroupStatusCode.INACTIVE,
       );
