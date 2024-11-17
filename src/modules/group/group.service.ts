@@ -33,15 +33,20 @@ export class GroupService {
     userId: string,
     addGroupDto: AddGroupDto,
   ): Promise<Group | undefined> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
+      const { user_ids, name, description } = addGroupDto;
       await this.userService.findByIdAndCheckExist(userId);
 
       const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
         GroupStatusCode.ACTIVE,
       );
 
-      const newGroup = new Group();
-      newGroup.name = addGroupDto.name;
+      let newGroup = new Group();
+      newGroup.name = name;
+      newGroup.description = description;
       newGroup.created_by = userId;
       newGroup.group_status_id = groupStatus.id;
       newGroup.code = genRandomCode();
@@ -53,33 +58,38 @@ export class GroupService {
         'base64',
       );
 
-      await this.groupRepository.insert(newGroup);
-      const createdGroup = await this.findByCode(newGroup.code);
-      const queryRunner = this.dataSource.createQueryRunner();
-      try {
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
+      await queryRunner.manager.insert(Group, newGroup);
+      newGroup = await this.findByCode(newGroup.code);
 
-        const createdDate = new Date();
-        const newMember = new GroupMembers();
-        newMember.group_id = createdGroup.id;
-        newMember.created_by = userId;
-        newMember.user_id = userId;
-        newMember.created_date = createdDate;
-        await queryRunner.manager.save(newMember);
+      //add user created group to group member
+      const createdDate = new Date();
+      const newMember = new GroupMembers();
+      newMember.group_id = newGroup.id;
+      newMember.created_by = userId;
+      newMember.user_id = userId;
+      newMember.created_date = createdDate;
+      await queryRunner.manager.save(newMember);
 
-        await queryRunner.commitTransaction();
-      } catch (ex) {
-        Logger.error(ex);
-        await queryRunner.rollbackTransaction();
-        throw ex;
-      } finally {
-        await queryRunner.release();
+      if (user_ids) {
+        for (let i = 0; i < user_ids.length; i++) {
+          await this.userService.findByIdAndCheckExist(user_ids[i]);
+          const newMember = new GroupMembers();
+          newMember.user_id = user_ids[i];
+          newMember.group_id = newGroup.id;
+          newMember.created_by = userId;
+          newMember.created_date = createdDate;
+          await queryRunner.manager.save(newMember);
+        }
       }
-      return createdGroup;
+
+      await queryRunner.commitTransaction();
+      return newGroup;
     } catch (ex) {
       Logger.error(ex);
+      await queryRunner.rollbackTransaction();
       throw ex;
+    } finally {
+      await queryRunner.release();
     }
   }
 

@@ -8,4 +8,7 @@ export class AddGroupDto {
 
   @ApiProperty()
   description: string;
+
+  @ApiProperty()
+  user_ids: string[];
 }
