@@ -135,10 +135,7 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ code });
   }
 
-  async deleteGroupById(
-    userId: string,
-    groupId: string,
-  ): Promise<Group | undefined> {
+  async delete(userId: string, groupId: string): Promise<Group | undefined> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -168,9 +165,6 @@ export class GroupService {
       }
 
       await queryRunner.commitTransaction();
-
-      await this.groupRepository.delete(groupId);
-
       return group;
     } catch (ex) {
       Logger.error(ex);

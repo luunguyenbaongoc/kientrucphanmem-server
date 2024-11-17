@@ -99,6 +99,6 @@ export class GroupController {
   @Delete('/:id')
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   deleteUserGroup(@AuthUser() userId: string, @Param('id') id: string) {
-    return this.groupService.deleteGroupById(userId, id);
+    return this.groupService.delete(userId, id);
   }
 }
