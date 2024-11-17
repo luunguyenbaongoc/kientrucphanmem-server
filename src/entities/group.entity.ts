@@ -41,6 +41,7 @@ export class Group {
 
   @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
     eager: false,
+    cascade: [ 'remove']
   })
   @JoinColumn()
   group_members: GroupMembers[];

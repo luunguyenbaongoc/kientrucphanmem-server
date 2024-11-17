@@ -8,7 +8,8 @@ import {
   UseGuards,
   UploadedFile,
   UseInterceptors,
-  Param
+  Param,
+  Delete
 } from '@nestjs/common';
 import { 
   ApiTags, 
@@ -90,11 +91,10 @@ export class GroupController {
     return this.groupService.updateGroup(userId, { id: groupId, avatar: file.path } as UpdateGroupDto);
   }
 
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @UseGuards(JwtAuthGuard)
-  // @Delete('groups/:id')
-  // @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
-  // deleteUserGroup(@Param('id') id: string) {
-  //   return this.groupService.deleteGroupById(id);
-  // }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @Delete(':groupId')
+  terminateGroup(@AuthUser() userId: string, @Param('groupId') groupId: string) {
+    return this.groupService.terminateGroup(groupId, userId);
+  }
 }

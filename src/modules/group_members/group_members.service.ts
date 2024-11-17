@@ -85,7 +85,7 @@ export class GroupMembersService {
     const queryRunner = this.dataSource.createQueryRunner();
     try {
       await this.userService.findByIdAndCheckExist(userId);
-      const isGroupAdmin = await this.checkUserIsGroupAdmin(userId, removeMembersDto.group_id);
+      const isGroupAdmin = await this.groupService.checkUserIsGroupAdmin(userId, removeMembersDto.group_id);
       if (!isGroupAdmin) {
         return false;
       }
@@ -165,10 +165,5 @@ export class GroupMembersService {
       Logger.error(ex);
       throw ex;
     }
-  }
-
-  async checkUserIsGroupAdmin(userId: string, groupId: string): Promise<boolean> {
-    const group = await this.groupService.findByIdAndCheckExist(groupId);
-    return group.created_by === userId;
   }
 }

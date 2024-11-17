@@ -135,12 +135,30 @@ export class GroupService {
     return await this.groupRepository.findOneBy({ code });
   }
 
-  async deleteGroupById(groupId: string): Promise<void> {
-    const group = await this.findById(groupId);
-    if (!group) {
-      throw new Error('Group not found');
+  async terminateGroup(groupId: string, userId: string): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      const isAdmin: boolean = await this.checkUserIsGroupAdmin(userId, groupId);
+      if (!isAdmin) return;
+      const group = await this.findByIdAndCheckExist(groupId);
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      await queryRunner.manager.remove(group);
+      await queryRunner.commitTransaction();
     }
+    catch (ex) {
+      Logger.error(ex);
+      await queryRunner.rollbackTransaction();
+      throw ex;
+    }
+    finally {
+      await queryRunner.release();
+    }
+    return;
+  }
 
-    await this.groupRepository.delete(groupId);
+  async checkUserIsGroupAdmin(userId: string, groupId: string): Promise<boolean> {
+    const group = await this.findByIdAndCheckExist(groupId);
+    return group.created_by === userId;
   }
 }
