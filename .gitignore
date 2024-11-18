@@ -397,6 +397,8 @@ Temporary Items
 .env
 .env.production
 .env.staging
+.env.test
+generate_fake_data.py
 dist
 .webpack
 .serverless/**/*.zip
@@ -405,3 +407,6 @@ config.yaml
 
 # Media files
 uploads/
+
+# VsCode
+.vscode
