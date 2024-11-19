@@ -12,6 +12,7 @@ import { GroupModule } from './modules/group/group.module';
 import { FriendModule } from './modules/friend/friend.module';
 import { GroupMembersModule } from './modules/group_members/group_members.module';
 import { FriendRequestModule } from './modules/friend_request/friend_request.module';
+import { ChatModule } from './modules/socket/chat/chat.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { FriendRequestModule } from './modules/friend_request/friend_request.mod
     FriendModule,
     GroupMembersModule,
     FriendRequestModule,
+    ChatModule,
   ],
   controllers: [],
   providers: [

@@ -17,8 +17,16 @@ export class GroupStatusService {
     const roles = await this.groupStatusRepository.find();
     if (roles.length === 0) {
       await this.groupStatusRepository.save([
-        { code: GroupStatusCode.ACTIVE, name: 'Active', created_date: new Date(Date.now()) },
-        { code: GroupStatusCode.INACTIVE, name: 'Inactive', created_date: new Date(Date.now()) },
+        {
+          code: GroupStatusCode.ACTIVE,
+          name: 'Active',
+          created_date: new Date(Date.now()),
+        },
+        {
+          code: GroupStatusCode.INACTIVE,
+          name: 'Inactive',
+          created_date: new Date(Date.now()),
+        },
       ]);
     }
   }
