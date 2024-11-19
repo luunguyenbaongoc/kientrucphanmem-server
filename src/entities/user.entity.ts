@@ -4,11 +4,11 @@ import {
   PrimaryGeneratedColumn,
   JoinColumn,
   OneToMany,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
-import { Group } from './group.entity';
 import { Profile } from './profile.entity';
+import { GroupMembers } from './group_members.entity';
+import { Friend } from './friend.entity';
+import { FriendRequest } from './friend_request.entity';
 
 @Entity('user')
 export class User {
@@ -32,14 +32,39 @@ export class User {
 
   @OneToMany(() => Profile, (Profile) => Profile.user, {
     eager: false,
-    cascade: true,
   })
   @JoinColumn()
   profile: Profile[];
 
-  @ManyToMany(() => Group, (group) => group.members, {
+  @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
     eager: false,
   })
-  @JoinTable()
-  groups: Group[];
+  @JoinColumn()
+  group_members: GroupMembers[];
+
+  @OneToMany(() => Friend, (Friend) => Friend.to_user_profile, {
+    eager: false,
+  })
+  @JoinColumn()
+  to_user_friends: Friend[];
+
+  @OneToMany(
+    () => FriendRequest,
+    (FriendRequest) => FriendRequest.to_user_profile,
+    {
+      eager: false,
+    },
+  )
+  @JoinColumn()
+  to_user_friend_requests: FriendRequest[];
+
+  @OneToMany(
+    () => FriendRequest,
+    (FriendRequest) => FriendRequest.from_user_profile,
+    {
+      eager: false,
+    },
+  )
+  @JoinColumn()
+  from_user_friend_requests: FriendRequest[];
 }

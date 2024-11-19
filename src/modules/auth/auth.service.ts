@@ -61,6 +61,8 @@ export class AuthService {
     registerDto: RegisterDto,
   ): Promise<RegisterResult | undefined> {
     const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
     try {
       const { phone, password, fullname } = { ...registerDto };
 
@@ -78,9 +80,6 @@ export class AuthService {
           `${`Người dùng ${phone} đã tồn tại`}`,
         );
       }
-
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
 
       const newUser = new User();
       newUser.password = await this.hashData(password);
@@ -323,6 +322,7 @@ export class AuthService {
 
       return true;
     } catch (ex) {
+      Logger.error(ex);
       throw ex;
     }
   }

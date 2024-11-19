@@ -1,8 +1,8 @@
 import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateGroupDto {
+export class FindByUserDto {
   @ApiProperty()
-  @IsString({ message: 'Không có tên nhóm' })
-  name: string;
+  @IsString({ message: 'Không có group_id' })
+  searchText: string;
 }

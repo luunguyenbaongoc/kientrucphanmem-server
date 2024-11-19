@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class RevokeRefreshDto {
+export class UpdateFriendDto {
   @ApiProperty()
   @IsString({ message: 'Không có id' })
   id: string;
 
   @ApiProperty()
-  @IsString({ message: 'Không có refresh token' })
-  refresh_token: string;
+  @IsString({ message: 'Không có deleted' })
+  deleted: boolean;
 }

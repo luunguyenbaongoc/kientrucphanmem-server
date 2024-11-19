@@ -18,7 +18,7 @@ import {
   RegisterDto,
 } from './dto';
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -61,6 +61,7 @@ export class AuthController {
   }
 
   @Public()
+  @ApiConsumes('application/json')
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   refresh(@Body() refreshDto: RefreshDto) {
@@ -69,6 +70,7 @@ export class AuthController {
 
   @Public()
   @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
   @Post('revoke-refresh')
   revokeRefresh(@Body() revokeRefreshDto: RevokeRefreshDto) {
     return this.authService.revokeRefreshToken(revokeRefreshDto);

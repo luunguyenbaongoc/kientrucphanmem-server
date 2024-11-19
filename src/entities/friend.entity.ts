@@ -1,28 +1,30 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
+  Entity,
   JoinColumn,
-  OneToMany,
   ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('profile')
-export class Profile {
+@Entity('friend')
+export class Friend {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  fullname: string;
-
-  @Column({ nullable: true })
-  avatar: string;
+  from_user: string;
 
   @Column()
-  user_id: string;
+  to_user: string;
+
+  @Column()
+  created_date: Date;
+
+  @Column()
+  deleted: boolean;
 
   @ManyToOne(() => User, (User) => User.id, { eager: false })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @JoinColumn({ name: 'to_user' })
+  to_user_profile: User;
 }

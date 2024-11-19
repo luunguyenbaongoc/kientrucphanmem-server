@@ -9,6 +9,9 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtAuthGuard } from './modules/auth/guards';
 import { ProfileModule } from './modules/profile/profile.module';
 import { GroupModule } from './modules/group/group.module';
+import { FriendModule } from './modules/friend/friend.module';
+import { GroupMembersModule } from './modules/group_members/group_members.module';
+import { FriendRequestModule } from './modules/friend_request/friend_request.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { GroupModule } from './modules/group/group.module';
     PassportModule,
     ProfileModule,
     GroupModule,
+    FriendModule,
+    GroupMembersModule,
+    FriendRequestModule,
   ],
   controllers: [],
   providers: [
