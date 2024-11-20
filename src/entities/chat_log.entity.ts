@@ -25,4 +25,7 @@ export class ChatLog {
 
   @Column()
   content_type_id: string;
+
+  @Column()
+  owner_id: string;
 }
