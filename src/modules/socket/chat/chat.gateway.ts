@@ -6,7 +6,6 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { JwtAuthGuard } from 'src/modules/auth/guards';
 
 @WebSocketGateway(3002, {
   cors: {
