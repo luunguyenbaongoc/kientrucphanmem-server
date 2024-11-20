@@ -13,6 +13,7 @@ import { FriendModule } from './modules/http/friend/friend.module';
 import { GroupMembersModule } from './modules/http/group_members/group_members.module';
 import { FriendRequestModule } from './modules/http/friend_request/friend_request.module';
 import { ChatModule } from './modules/socket/chat/chat.module';
+import { WsAuthModule } from './modules/socket/auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ChatModule } from './modules/socket/chat/chat.module';
     GroupMembersModule,
     FriendRequestModule,
     ChatModule,
+    WsAuthModule,
   ],
   controllers: [],
   providers: [

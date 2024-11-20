@@ -1,11 +1,15 @@
-import { UseGuards } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
+import { WsJwtGuard } from '../auth/ws-jwt/ws-jwt.guard';
+import { AuthSocket } from '../auth/types';
+import { SocketAuthMiddleware } from '../auth/middlewares/ws.mw';
 
 @WebSocketGateway(3002, {
   cors: {
@@ -13,8 +17,18 @@ import { Socket } from 'socket.io';
   },
   namespace: 'chat',
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  handleConnection(client: Socket): void {
+@UseGuards(WsJwtGuard)
+export class ChatGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
+  afterInit(client: AuthSocket) {
+    client.use(SocketAuthMiddleware() as any);
+  }
+
+  handleConnection(client: AuthSocket): void {
+    Logger.log(
+      `Client ${client.id} connected, User: ${JSON.stringify(client.user)}`,
+    );
     // const user: IJwtPayload = client.user;
     // this.wsChatService.setTimeoutClient(client);
     // client.join(ROOM_KEY.USER(user.userId));
