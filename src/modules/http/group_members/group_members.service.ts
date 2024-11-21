@@ -30,6 +30,7 @@ export class GroupMembersService {
     @Inject(forwardRef(() => GroupService))
     private groupService: GroupService,
     private dataSource: DataSource,
+    private groupStatusService: GroupStatusService,
   ) {}
 
   async addMembers(
@@ -121,12 +122,15 @@ export class GroupMembersService {
   ): Promise<any> {
     try {
       const searchText = findByUserDto.searchText || '';
+      const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
+        GroupStatusCode.ACTIVE,
+      );
       const groupMembers: GroupMembers[] =
         await this.groupMembersRepository.find({
           where: {
             user_id: userId,
             group: {
-              code: GroupStatusCode.ACTIVE,
+              group_status_id: groupStatus.id,
               name: ILike(`%${searchText}%`),
             },
           },
@@ -171,4 +175,16 @@ export class GroupMembersService {
       throw ex;
     }
   }
+
+  // async removeGroup(userId: string, groupId: string): Promise<boolean> {
+  //   try {
+  //     await this.userService.findByIdAndCheckExist(userId);
+  //     const group = await this.groupService.findByIdAndCheckExist(groupId);
+
+  //     this.
+  //   } catch (ex) {
+  //     Logger.error(ex);
+  //     throw ex;
+  //   }
+  // }
 }
