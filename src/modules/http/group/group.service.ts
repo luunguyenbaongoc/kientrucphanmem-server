@@ -13,6 +13,7 @@ import { GroupMembers } from 'src/entities/group_members.entity';
 import { GroupMembersService } from '../group_members/group_members.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { FriendService } from '../friend/friend.service';
 
 @Injectable()
 export class GroupService {
@@ -23,6 +24,7 @@ export class GroupService {
     private userService: UserService,
     private groupStatusService: GroupStatusService,
     private dataSource: DataSource,
+    private friendService: FriendService,
   ) {}
 
   async findByName(name: string): Promise<Group | undefined> {
@@ -44,7 +46,7 @@ export class GroupService {
         GroupStatusCode.ACTIVE,
       );
 
-      let newGroup = new Group();
+      const newGroup = new Group();
       newGroup.name = name;
       newGroup.description = description;
       newGroup.created_by = userId;
@@ -72,7 +74,16 @@ export class GroupService {
 
       if (user_ids) {
         for (let i = 0; i < user_ids.length; i++) {
-          await this.userService.findByIdAndCheckExist(user_ids[i]);
+          const uid = user_ids[i];
+          await this.userService.findByIdAndCheckExist(uid);
+          const isFriend = await this.friendService.isFriend(userId, uid);
+          if (!isFriend) {
+            throw new AppError(
+              HttpStatus.BAD_REQUEST,
+              ErrorCode.BAD_REQUEST,
+              `Người dùng id ${userId} và id ${uid} không phải là bạn bè`,
+            );
+          }
           const newMember = new GroupMembers();
           newMember.user_id = user_ids[i];
           newMember.group_id = newGroup.id;
