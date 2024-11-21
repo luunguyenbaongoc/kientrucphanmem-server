@@ -54,4 +54,14 @@ export class GroupMembersController {
   findByGroupId(@Param('group_id', new ParseUUIDPipe()) group_id: string) {
     return this.groupMembersService.findByGroupId(group_id);
   }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('application/json')
+  @Get('/leave-group/:group_id')
+  leaveGroup(
+    @AuthUser() userId: string,
+    @Param('group_id', new ParseUUIDPipe()) group_id: string,
+  ) {
+    return this.groupMembersService.leaveGroup(userId, group_id);
+  }
 }

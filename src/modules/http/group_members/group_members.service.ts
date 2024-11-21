@@ -176,15 +176,52 @@ export class GroupMembersService {
     }
   }
 
-  // async removeGroup(userId: string, groupId: string): Promise<boolean> {
-  //   try {
-  //     await this.userService.findByIdAndCheckExist(userId);
-  //     const group = await this.groupService.findByIdAndCheckExist(groupId);
+  async leaveGroup(userId: string, groupId: string): Promise<boolean> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await this.userService.findByIdAndCheckExist(userId);
+      const group = await this.groupService.findByIdAndCheckExist(groupId);
+      const groupMember = await this.groupMembersRepository.findOneBy({
+        user_id: userId,
+        group_id: groupId,
+      });
+      if (!groupMember) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Dữ liệu sai, vui lòng thử lại`,
+        );
+      }
+      const isOwner = await this.groupService.checkUserIsGroupAdmin(
+        userId,
+        groupId,
+      );
+      if (isOwner) {
+        const groupMembers = await this.findByGroupId(groupId);
+        if (groupMembers.count > 0) {
+          group.owner_id = groupMembers.users[0].user_id;
+        } else {
+          const groupStatus =
+            await this.groupStatusService.findByCodeAndCheckExist(
+              GroupStatusCode.INACTIVE,
+            );
+          group.group_status_id = groupStatus.id;
+        }
+        await queryRunner.manager.save(group);
+      }
 
-  //     this.
-  //   } catch (ex) {
-  //     Logger.error(ex);
-  //     throw ex;
-  //   }
-  // }
+      await queryRunner.manager.delete(GroupMembers, groupMember);
+
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (ex) {
+      Logger.error(ex);
+      await queryRunner.rollbackTransaction();
+      throw ex;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

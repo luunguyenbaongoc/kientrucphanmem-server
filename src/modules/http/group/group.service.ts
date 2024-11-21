@@ -76,6 +76,9 @@ export class GroupService {
       if (user_ids) {
         for (let i = 0; i < user_ids.length; i++) {
           const uid = user_ids[i];
+          if (userId === uid) {
+            continue;
+          }
           await this.userService.findByIdAndCheckExist(uid);
           const isFriend = await this.friendService.isFriend(userId, uid);
           if (!isFriend) {
