@@ -55,6 +55,7 @@ export class GroupService {
       newGroup.created_date = new Date();
       newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
+      newGroup.owner_id = userId;
       newGroup.avatar = fs.readFileSync(
         path.join(__dirname, '../../../images/default-avatar.jpg'),
         'base64',
@@ -201,6 +202,6 @@ export class GroupService {
     groupId: string,
   ): Promise<boolean> {
     const group = await this.findByIdAndCheckExist(groupId);
-    return group.created_by === userId;
+    return group.owner_id === userId;
   }
 }
