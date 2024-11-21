@@ -90,7 +90,7 @@ export class AuthService {
 
       const newProfile = new Profile();
       newProfile.avatar = fs.readFileSync(
-        path.join(__dirname, '../../images/default-avatar.jpg'),
+        path.join(__dirname, '../../../images/default-avatar.jpg'),
         'base64',
       );
       newProfile.fullname = fullname;

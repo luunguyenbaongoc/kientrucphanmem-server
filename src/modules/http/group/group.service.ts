@@ -54,12 +54,12 @@ export class GroupService {
       newGroup.latest_updated_date = new Date();
       newGroup.latest_updated_by = userId;
       newGroup.avatar = fs.readFileSync(
-        path.join(__dirname, '../../images/default-avatar.jpg'),
+        path.join(__dirname, '../../../images/default-avatar.jpg'),
         'base64',
       );
 
       await queryRunner.manager.insert(Group, newGroup);
-      newGroup = await this.findByCode(newGroup.code);
+      // newGroup = await this.findByCode(newGroup.code);
 
       //add user created group to group member
       const createdDate = new Date();
