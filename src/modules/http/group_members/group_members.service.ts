@@ -200,8 +200,14 @@ export class GroupMembersService {
       );
       if (isOwner) {
         const groupMembers = await this.findByGroupId(groupId);
-        if (groupMembers.count > 0) {
-          group.owner_id = groupMembers.users[0].user_id;
+        if (groupMembers.count > 1) {
+          for (let i = 0; i < groupMembers.count; i++) {
+            const uid = groupMembers.users[i].user_id;
+            if (userId !== uid) {
+              group.owner_id = uid;
+              break;
+            }
+          }
         } else {
           const groupStatus =
             await this.groupStatusService.findByCodeAndCheckExist(
