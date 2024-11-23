@@ -5,6 +5,7 @@ import { AppModule } from 'src/app.module';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities';
 import { AuthService } from 'src/modules/auth/auth.service';
+import { resetUserDb } from 'test/db-utils';
 
 describe('PublicAuthAPI (e2e)', () => {
   let app: INestApplication;
@@ -21,6 +22,7 @@ describe('PublicAuthAPI (e2e)', () => {
     app = moduleFixture.createNestApplication();
     userRepository = app.get('UserRepository');
     authService = app.get<AuthService>(AuthService);
+    await resetUserDb(userRepository);
     await app.init();
   });
 
@@ -110,19 +112,7 @@ describe('PublicAuthAPI (e2e)', () => {
   });
 
   afterEach(async () => {
-    await userRepository.manager.query(
-      'DELETE FROM friend_request WHERE from_user IS NOT NULL OR to_user IS NOT NULL',
-    );
-    await userRepository.manager.query(
-      'DELETE FROM friend WHERE to_user IS NOT NULL',
-    );
-    await userRepository.manager.query(
-      'DELETE FROM group_members WHERE user_id IS NOT NULL',
-    );
-    await userRepository.manager.query(
-      'DELETE FROM profile WHERE user_id IS NOT NULL',
-    );
-    await userRepository.delete({});
+    await resetUserDb(userRepository);
   });
 
   afterAll(async () => {
