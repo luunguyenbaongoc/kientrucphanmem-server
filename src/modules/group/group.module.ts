@@ -7,12 +7,14 @@ import { Group } from 'src/entities';
 import { GroupStatusModule } from '../group_status/group_status.module';
 import { GroupStatus } from 'src/entities/group_status.entity';
 import { GroupMembersModule } from '../group_members/group_members.module';
+import { FriendModule } from '../friend/friend.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Group, GroupStatus]),
     GroupMembersModule,
     UserModule,
+    FriendModule,
     GroupStatusModule,
   ],
   exports: [GroupService],

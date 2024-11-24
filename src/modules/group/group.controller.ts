@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { GroupService } from './group.service';
@@ -36,12 +37,13 @@ export class GroupController {
 
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
-  @Put('/')
+  @Put('/:id')
   updateGroup(
     @AuthUser() userId: string,
+    @Param('id') id: string,
     @Body() updateGroupDto: UpdateGroupDto,
   ) {
-    return this.groupService.updateGroup(userId, updateGroupDto);
+    return this.groupService.updateGroup(userId, id, updateGroupDto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -88,8 +90,7 @@ export class GroupController {
     @UploadedFile() file: Express.Multer.File,
     @Param('groupId') groupId: string,
   ): Promise<Group> {
-    return this.groupService.updateGroup(userId, {
-      id: groupId,
+    return this.groupService.updateGroup(userId, groupId, {
       avatar: file.path,
     } as UpdateGroupDto);
   }

@@ -13,6 +13,7 @@ import { GroupMembers } from 'src/entities/group_members.entity';
 import { GroupMembersService } from '../group_members/group_members.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { FriendService } from '../friend/friend.service';
 
 @Injectable()
 export class GroupService {
@@ -21,6 +22,7 @@ export class GroupService {
     private groupRepository: Repository<Group>,
     private groupMemberService: GroupMembersService,
     private userService: UserService,
+    private friendService: FriendService,
     private groupStatusService: GroupStatusService,
     private dataSource: DataSource,
   ) {}
@@ -58,8 +60,7 @@ export class GroupService {
         'base64',
       );
 
-      await queryRunner.manager.insert(Group, newGroup);
-      newGroup = await this.findByCode(newGroup.code);
+      newGroup = await queryRunner.manager.save(newGroup);
 
       //add user created group to group member
       const createdDate = new Date();
@@ -73,6 +74,14 @@ export class GroupService {
       if (user_ids) {
         for (let i = 0; i < user_ids.length; i++) {
           await this.userService.findByIdAndCheckExist(user_ids[i]);
+          const isFriend = await this.friendService.isFriend(userId, user_ids[i]);
+          if (!isFriend) {
+            throw new AppError(
+              HttpStatus.BAD_REQUEST,
+              ErrorCode.BAD_REQUEST,
+              `Người dùng id ${userId} và id ${user_ids[i]} không phải là bạn bè`,
+            );
+          }
           const newMember = new GroupMembers();
           newMember.user_id = user_ids[i];
           newMember.group_id = newGroup.id;
@@ -95,11 +104,13 @@ export class GroupService {
 
   async updateGroup(
     userId: string,
+    groupId: string,
     updateGroupDto: UpdateGroupDto,
   ): Promise<Group | undefined> {
     try {
       await this.userService.findByIdAndCheckExist(userId);
-      const group = await this.findByIdAndCheckExist(updateGroupDto.id);
+      const group = await this.findByIdAndCheckExist(groupId);
+      console.log(">>>>>>>>>>>>>>>", group)
       const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
         updateGroupDto.group_status_code,
       );
@@ -110,7 +121,6 @@ export class GroupService {
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
       group.description = updateGroupDto.description || group.description;
-
       await this.groupRepository.save(group);
 
       return group;
