@@ -91,31 +91,30 @@ export class ChatBoxService {
   ): Promise<ChatBox | undefined> {
     try {
       await this.userService.findByIdAndCheckExist(from_user);
-      let whereCondition;
+      let whereConditions;
+      let relations;
       if (to_user) {
         await this.userService.findByIdAndCheckExist(to_user);
-        whereCondition = {
+        whereConditions = {
           from_user,
           to_user,
           deleted: false,
         };
+        relations = ['to_user_profile', 'to_user_profile.profile'];
       }
       if (to_group) {
         await this.groupService.findByIdAndCheckExist(to_group);
-        whereCondition = {
+        whereConditions = {
           from_user,
           to_group,
           deleted: false,
         };
+        relations = ['to_group_profile'];
       }
 
       const chatbox = await this.chatboxRepository.findOne({
-        where: { ...whereCondition },
-        relations: [
-          'to_user_profile',
-          'to_user_profile.profile',
-          'to_group_profile',
-        ],
+        where: { ...whereConditions },
+        relations: [...relations],
         select: {
           id: true,
           last_accessed_date: true,
