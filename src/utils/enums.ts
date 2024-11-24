@@ -8,3 +8,9 @@ export enum FriendRequestStatusCode {
   PENDING = 'pending',
   DECLINED = 'declined',
 }
+
+export enum ChatLogContentTypeCode {
+  TEXT = 'text',
+  IMAGE = 'image',
+  VIDEO = 'video',
+}

@@ -18,9 +18,21 @@ export class FriendRequestStatusService {
     if (statuses.length === 0) {
       // only create new status if status is not found in the database.
       await this.friendRequestStatusRepository.save([
-        { code: FriendRequestStatusCode.ACCEPTED, name: 'Accepted', created_date: new Date(Date.now()) },
-        { code: FriendRequestStatusCode.DECLINED, name: 'Declined', created_date: new Date(Date.now()) },
-        { code: FriendRequestStatusCode.PENDING, name: 'Pending', created_date: new Date(Date.now()) },
+        {
+          code: FriendRequestStatusCode.ACCEPTED,
+          name: 'Accepted',
+          created_date: new Date(Date.now()),
+        },
+        {
+          code: FriendRequestStatusCode.DECLINED,
+          name: 'Declined',
+          created_date: new Date(Date.now()),
+        },
+        {
+          code: FriendRequestStatusCode.PENDING,
+          name: 'Pending',
+          created_date: new Date(Date.now()),
+        },
       ]);
     }
   }

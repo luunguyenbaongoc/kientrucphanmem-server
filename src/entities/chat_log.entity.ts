@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { ChatLogContentType } from './chat_log_content_type.entity';
 
 @Entity('chat_log')
 export class ChatLog {
@@ -28,4 +35,12 @@ export class ChatLog {
 
   @Column()
   owner_id: string;
+
+  @ManyToOne(
+    () => ChatLogContentType,
+    (ChatLogContentType) => ChatLogContentType.id,
+    { eager: false },
+  )
+  @JoinColumn({ name: 'content_type_id' })
+  content_type: ChatLogContentType;
 }

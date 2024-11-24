@@ -14,6 +14,10 @@ import { GroupMembersModule } from './modules/http/group_members/group_members.m
 import { FriendRequestModule } from './modules/http/friend_request/friend_request.module';
 import { ChatModule } from './modules/socket/chat/chat.module';
 import { WsAuthModule } from './modules/socket/auth/auth.module';
+import { ChatLogContentTypeModule } from './modules/http/chat_log_content_type/chat_log_content_type.module';
+import { ChatLogModule } from './modules/http/chat_log/chat_log.module';
+import { ChatBoxModule } from './modules/http/chat_box/chat_box.module';
+import { ChatBoxChatLogModule } from './modules/http/chat_box_chat_log/chat_box_chat_log.module';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { WsAuthModule } from './modules/socket/auth/auth.module';
     FriendRequestModule,
     ChatModule,
     WsAuthModule,
+    ChatLogContentTypeModule,
+    ChatLogModule,
+    ChatBoxModule,
+    ChatBoxChatLogModule,
   ],
   controllers: [],
   providers: [
