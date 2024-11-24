@@ -85,6 +85,7 @@ export class UserService {
     newProfile.fullname = updateProfileDto.fullname;
     newProfile.user_id = userId;
     newProfile.user = user;
+    newProfile.avatar = updateProfileDto.avatar;
     const profile = await this.profileService.addProfile(newProfile);
     return profile;
   }

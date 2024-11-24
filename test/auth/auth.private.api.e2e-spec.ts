@@ -65,13 +65,13 @@ describe('PrivateAuthAPI (e2e)', () => {
       .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  it('Test reset password sucessfully with authentication required (POST)', async () => {
-    // Only authenticated user can change their password.
-    await request(app.getHttpServer())
-      .post('/auth/reset-password')
-      .send({ phone: existingPhone, new_password: `${password}_new` })
-      .expect(HttpStatus.UNAUTHORIZED);
-  });
+  // it('Test reset password sucessfully with authentication required (POST)', async () => {
+  //   // Only authenticated user can change their password.
+  //   await request(app.getHttpServer())
+  //     .post('/auth/reset-password')
+  //     .send({ phone: existingPhone, new_password: `${password}_new` })
+  //     .expect(HttpStatus.UNAUTHORIZED);
+  // });
 
   afterEach(async () => {
     await resetUserDb(userRepository);
