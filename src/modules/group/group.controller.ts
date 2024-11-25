@@ -98,7 +98,6 @@ export class GroupController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Delete('/:id')
-  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   deleteUserGroup(@AuthUser() userId: string, @Param('id') id: string) {
     return this.groupService.delete(userId, id);
   }

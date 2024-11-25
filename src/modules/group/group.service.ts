@@ -110,7 +110,6 @@ export class GroupService {
     try {
       await this.userService.findByIdAndCheckExist(userId);
       const group = await this.findByIdAndCheckExist(groupId);
-      console.log(">>>>>>>>>>>>>>>", group)
       const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
         updateGroupDto.group_status_code,
       );
