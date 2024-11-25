@@ -2,7 +2,7 @@ chạy project: npm run start:dev (sử dụng file .env)
 
 build project: npm run build
 
-run test: npm run test:e2e
+run test: npm run test:e2e 
 
 build docker: docker build -t kientrucphanmem/server:tag . (tag là version)
 
