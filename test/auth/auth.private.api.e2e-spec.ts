@@ -51,8 +51,8 @@ describe('PrivateAuthAPI (e2e)', () => {
 
   it('/auth/logout (POST)', async () => {
     /*
-    * Test logout sucessfully.
-    */
+     * Test logout sucessfully.
+     */
     await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -66,8 +66,8 @@ describe('PrivateAuthAPI (e2e)', () => {
 
   it('/auth/logout (POST)', async () => {
     /*
-    * Test logout unsuccessfully because of lacking access token.
-    */
+     * Test logout unsuccessfully because of lacking access token.
+     */
     await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Refresh_token', refreshToken)

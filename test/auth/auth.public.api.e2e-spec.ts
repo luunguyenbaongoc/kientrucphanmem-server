@@ -36,8 +36,8 @@ describe('PublicAuthAPI (e2e)', () => {
 
   it('/auth/check-user-exist/:phone (GET)', async () => {
     /*
-    * Test check if user exists.
-    */
+     * Test check if user exists.
+     */
     await request(app.getHttpServer())
       .get(`/auth/check-user-exist/012345678`)
       .expect(HttpStatus.OK)
@@ -55,8 +55,8 @@ describe('PublicAuthAPI (e2e)', () => {
 
   it('/auth/register (POST)', () => {
     /*
-    * Test register new user successfully.
-    */
+     * Test register new user successfully.
+     */
     return request(app.getHttpServer())
       .post('/auth/register')
       .send({ fullname: 'John Doe', phone: '012345678', password })
@@ -76,8 +76,8 @@ describe('PublicAuthAPI (e2e)', () => {
 
   it('/auth/register (POST)', async () => {
     /*
-    * Test register unsuccessfully since user with that phone number already exists/
-    */
+     * Test register unsuccessfully since user with that phone number already exists/
+     */
     const response = await request(app.getHttpServer())
       .post('/auth/register')
       .send({ fullname: 'John Doe 1', phone: existingPhone, password })
@@ -91,8 +91,8 @@ describe('PublicAuthAPI (e2e)', () => {
 
   it('/auth/login (POST)', async () => {
     /*
-    * Test login successfully.
-    */
+     * Test login successfully.
+     */
     await request(app.getHttpServer())
       .post('/auth/login')
       .send({ phone: existingPhone, password })
@@ -118,9 +118,9 @@ describe('PublicAuthAPI (e2e)', () => {
 
   it('/auth/login (POST)', async () => {
     /*
-    * Test login unsuccessfully because user with phone number was not registered
-    * in the database.
-    */
+     * Test login unsuccessfully because user with phone number was not registered
+     * in the database.
+     */
     await request(app.getHttpServer())
       .post('/auth/login')
       .send({ phone: '123455334', password })
