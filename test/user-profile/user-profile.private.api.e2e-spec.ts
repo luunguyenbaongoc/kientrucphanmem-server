@@ -13,7 +13,6 @@ describe('PrivateUserAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
   let authService: AuthService;
-  let refreshToken: string;
   let accessToken: string;
   let userId: string;
   const existingPhone: string = '123456789';
@@ -41,16 +40,18 @@ describe('PrivateUserAPI (e2e)', () => {
       .post('/auth/login')
       .send({ phone: existingPhone, password })
       .expect(HttpStatus.OK);
-    const { refresh_token, access_token, user: { id }} = response.body;
-    refreshToken = refresh_token;
+    const {
+      access_token,
+      user: { id },
+    } = response.body;
     accessToken = access_token;
     userId = id;
   });
 
   it('/user/me/profiles (GET)', async () => {
     /*
-    * Test get user profile successfully.
-    */
+     * Test get user profile successfully.
+     */
     await request(app.getHttpServer())
       .get('/user/me/profiles')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -62,19 +63,21 @@ describe('PrivateUserAPI (e2e)', () => {
           /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89a-b][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
         );
         expect(response.body[0].user_id).toEqual(userId);
-        expect(response.body[0].avatar).toMatch(/^\/9j\/4AAQSkZJRgABAQEBLAEsAAD/,);
+        expect(response.body[0].avatar).toMatch(
+          /^\/9j\/4AAQSkZJRgABAQEBLAEsAAD/,
+        );
       });
   });
 
   it('/user/me/profiles (POST)', async () => {
     /*
-    * Test create new user profile successfully.
-    */
+     * Test create new user profile successfully.
+     */
     const base64Image = fs.readFileSync(
       path.join(__dirname, '../../src/images/default-avatar1.jpg'),
       'base64',
     );
-    const fullname: string = "John Doe 1";
+    const fullname: string = 'John Doe 1';
     await request(app.getHttpServer())
       .post('/user/me/profiles')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -96,8 +99,8 @@ describe('PrivateUserAPI (e2e)', () => {
 
   it('/user/me/profiles (POST)', async () => {
     /*
-    * Test create new user profile unsuccessfully because of upload large image
-    */
+     * Test create new user profile unsuccessfully because of upload large image
+     */
     const base64Image = fs.readFileSync(
       path.join(__dirname, 'large-image.jpg'),
       'base64',

@@ -39,7 +39,11 @@ describe('PrivateAuthAPI (e2e)', () => {
       .post('/auth/login')
       .send({ phone: existingPhone, password })
       .expect(HttpStatus.OK);
-    const { refresh_token, access_token, user: { id }} = response.body;
+    const {
+      refresh_token,
+      access_token,
+      user: { id },
+    } = response.body;
     refreshToken = refresh_token;
     accessToken = access_token;
     userId = id;

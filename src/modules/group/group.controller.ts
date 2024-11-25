@@ -10,7 +10,6 @@ import {
   UseInterceptors,
   Param,
   Delete,
-  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { GroupService } from './group.service';

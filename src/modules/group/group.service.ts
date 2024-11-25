@@ -74,7 +74,10 @@ export class GroupService {
       if (user_ids) {
         for (let i = 0; i < user_ids.length; i++) {
           await this.userService.findByIdAndCheckExist(user_ids[i]);
-          const isFriend = await this.friendService.isFriend(userId, user_ids[i]);
+          const isFriend = await this.friendService.isFriend(
+            userId,
+            user_ids[i],
+          );
           if (!isFriend) {
             throw new AppError(
               HttpStatus.BAD_REQUEST,

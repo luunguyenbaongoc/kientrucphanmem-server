@@ -13,9 +13,7 @@ describe('PublicUserAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
   let authService: AuthService;
-  let refreshToken: string;
   let accessToken: string;
-  let userId: string;
   const existingPhone: string = '123456789';
   const password: string = 'test-user-123';
 
@@ -41,16 +39,14 @@ describe('PublicUserAPI (e2e)', () => {
       .post('/auth/login')
       .send({ phone: existingPhone, password })
       .expect(HttpStatus.OK);
-    const { refresh_token, access_token, user: { id }} = response.body;
-    refreshToken = refresh_token;
+    const { access_token } = response.body;
     accessToken = access_token;
-    userId = id;
   });
 
   it('/user/me/profiles (authenticated required) (GET)', async () => {
     /*
-    * Test get user profile unsuccessfully.
-    */
+     * Test get user profile unsuccessfully.
+     */
     await request(app.getHttpServer())
       .get('/user/me/profiles')
       .expect(HttpStatus.UNAUTHORIZED);
@@ -58,13 +54,13 @@ describe('PublicUserAPI (e2e)', () => {
 
   it('/user/me/profiles (authenticated required) (POST)', async () => {
     /*
-    * Test create new user profile unsuccessfully.
-    */
+     * Test create new user profile unsuccessfully.
+     */
     const base64Image = fs.readFileSync(
       path.join(__dirname, '../../src/images/default-avatar1.jpg'),
       'base64',
     );
-    const fullname: string = "John Doe 1";
+    const fullname: string = 'John Doe 1';
     await request(app.getHttpServer())
       .post('/user/me/profiles')
       .send({ fullname: fullname, avatar: base64Image })
@@ -81,8 +77,8 @@ describe('PublicUserAPI (e2e)', () => {
 
   it('/profile/profiles/:profileId (authenticated required) (PATCH)', async () => {
     /*
-    * Test update user profile unsuccessfully because of authentication required.
-    */
+     * Test update user profile unsuccessfully because of authentication required.
+     */
     const base64Image = fs.readFileSync(
       path.join(__dirname, '../../src/images/default-avatar1.jpg'),
       'base64',

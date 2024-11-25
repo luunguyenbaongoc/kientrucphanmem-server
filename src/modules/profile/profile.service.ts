@@ -15,10 +15,10 @@ export class ProfileService {
 
   async addProfile(profile: Profile): Promise<Profile | undefined> {
     const result = await this.profilesRepository.insert(profile);
-    const newProfileId =  result.identifiers[0]?.id;
+    const newProfileId = result.identifiers[0]?.id;
     return await this.profilesRepository.findOneBy({
       user_id: profile.user_id,
-      id: newProfileId
+      id: newProfileId,
     });
   }
 

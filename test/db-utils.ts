@@ -12,11 +12,11 @@ export const resetUserDb = async (userRepository: any) => {
     'DELETE FROM profile WHERE user_id IS NOT NULL',
   );
   await userRepository.delete({});
-}
+};
 
 export const resetGroupDb = async (groupRepository: any) => {
   await groupRepository.manager.query(
     'DELETE FROM group_members WHERE group_id IS NOT NULL',
   );
   await groupRepository.delete({});
-}
+};
