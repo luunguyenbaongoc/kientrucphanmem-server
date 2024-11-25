@@ -4,7 +4,7 @@ import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
-import { UpdateProfileDto } from './dto';
+import { UpdateProfileDto } from '../profile/dto';
 import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
@@ -93,7 +93,10 @@ export class UserService {
     profileId: string,
     updateProfileDto: UpdateProfileDto,
   ): Promise<Profile> {
-    return this.profileService.updateProfile(profileId, updateProfileDto);
+    return this.profileService.updateProfile({
+      ...updateProfileDto,
+      profileId,
+    });
   }
 
   async getUserProfiles(userId: string): Promise<Profile[]> {
@@ -105,7 +108,8 @@ export class UserService {
     filepath: string,
     profileId: string,
   ): Promise<string> {
-    await this.profileService.updateProfile(profileId, {
+    await this.profileService.updateProfile({
+      profileId,
       avatar: filepath,
     } as UpdateProfileDto);
     return `File uploaded successfully: ${filepath}`;

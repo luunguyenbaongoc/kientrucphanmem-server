@@ -3,7 +3,7 @@ import { ErrorCode } from 'src/utils/error-code';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile } from 'src/entities';
 import { Repository } from 'typeorm';
-import { UpdateProfileDto } from '../user/dto';
+import { UpdateProfileDto } from './dto';
 import { AppError } from 'src/utils/AppError';
 
 @Injectable()
@@ -20,10 +20,9 @@ export class ProfileService {
     });
   }
 
-  async updateProfile(
-    profileId: string,
-    updateProfileDto: UpdateProfileDto,
-  ): Promise<Profile> {
+  async updateProfile(updateProfileDto: UpdateProfileDto): Promise<Profile> {
+    const { profileId, avatar, fullname } = updateProfileDto;
+
     const profile = await this.profilesRepository.findOne({
       where: { id: profileId },
     });
@@ -36,9 +35,9 @@ export class ProfileService {
       );
     }
 
-    profile.fullname = updateProfileDto.fullname || profile.fullname;
-    profile.avatar = updateProfileDto.avatar || profile.avatar;
-    return this.profilesRepository.save(profile);
+    profile.fullname = fullname;
+    profile.avatar = avatar;
+    return await this.profilesRepository.save(profile);
   }
 
   async findProfilesByUserId(userId: string): Promise<Profile[] | undefined> {

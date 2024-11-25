@@ -1,4 +1,4 @@
-import { 
+import {
   Controller,
   HttpCode,
   HttpStatus,
@@ -9,10 +9,11 @@ import {
   Body,
   UseGuards,
   UploadedFile,
+  Put,
 } from '@nestjs/common';
 import { ApiConsumes, ApiBody, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UpdateProfileDto } from '../user/dto';
+import { UpdateProfileDto } from './dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -37,15 +38,20 @@ export class ProfileController {
         },
       }),
       fileFilter: (req, file, callback) => {
-        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(file.mimetype);
+        const isImage = ['image/png', 'image/jpeg', 'image/jpg'].includes(
+          file.mimetype,
+        );
         if (!isImage) {
-          return callback(new Error(`Không hỗ trợ file ${extname(file.originalname)}`), false);
+          return callback(
+            new Error(`Không hỗ trợ file ${extname(file.originalname)}`),
+            false,
+          );
         }
         callback(null, true);
-      }
+      },
     }),
   )
-  @Post('profiles/:profileId/upload-image')
+  @Post('/:profileId/upload-image')
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -63,18 +69,17 @@ export class ProfileController {
     @UploadedFile() file: Express.Multer.File,
     @Param('profileId') profileId: string,
   ): Promise<Profile> {
-    return this.profileService.updateProfile(
-      profileId, { avatar: file.path } as UpdateProfileDto);
+    return this.profileService.updateProfile({
+      profileId,
+      avatar: file.path,
+    } as UpdateProfileDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json')
-  @Patch('profiles/:profileId')
-  updateUserProfile(
-    @Param('profileId') profileId: string,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
-    return this.profileService.updateProfile(profileId, updateProfileDto);
+  @Put('/')
+  updateUserProfile(@Body() updateProfileDto: UpdateProfileDto) {
+    return this.profileService.updateProfile(updateProfileDto);
   }
 }
