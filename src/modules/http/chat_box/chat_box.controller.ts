@@ -8,7 +8,7 @@ export class ChatBoxController {
 
   @HttpCode(HttpStatus.OK)
   @Get('/')
-  listFriend(@AuthUser() userId: string) {
+  listByUserId(@AuthUser() userId: string) {
     return this.chatboxService.listByUserId(userId);
   }
 }
