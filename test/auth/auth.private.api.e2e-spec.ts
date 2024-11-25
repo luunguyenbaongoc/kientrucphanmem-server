@@ -49,7 +49,10 @@ describe('PrivateAuthAPI (e2e)', () => {
     userId = id;
   });
 
-  it('Test logout sucessfully (POST)', async () => {
+  it('/auth/logout (POST)', async () => {
+    /*
+    * Test logout sucessfully.
+    */
     await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -61,7 +64,10 @@ describe('PrivateAuthAPI (e2e)', () => {
       });
   });
 
-  it('Test logout unsuccessfully with lack of token (POST)', async () => {
+  it('/auth/logout (POST)', async () => {
+    /*
+    * Test logout unsuccessfully because of lacking access token.
+    */
     await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Refresh_token', refreshToken)
@@ -69,8 +75,10 @@ describe('PrivateAuthAPI (e2e)', () => {
       .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  // it('Test reset password sucessfully with authentication required (POST)', async () => {
-  //   // Only authenticated user can change their password.
+  // it('/auth/reset-password (POST)', async () => {
+  //   /*
+  //   * Test reset password sucessfully with authentication required
+  //   */
   //   await request(app.getHttpServer())
   //     .post('/auth/reset-password')
   //     .send({ phone: existingPhone, new_password: `${password}_new` })
