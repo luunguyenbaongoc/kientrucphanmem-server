@@ -38,7 +38,10 @@ describe('PrivateAuthAPI (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ phone: existingPhone, password })
-      .expect(HttpStatus.OK);
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body).not.toHaveProperty('password');
+      });
     const {
       refresh_token,
       access_token,
@@ -75,15 +78,33 @@ describe('PrivateAuthAPI (e2e)', () => {
       .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  // it('/auth/reset-password (POST)', async () => {
-  //   /*
-  //   * Test reset password sucessfully with authentication required
-  //   */
-  //   await request(app.getHttpServer())
-  //     .post('/auth/reset-password')
-  //     .send({ phone: existingPhone, new_password: `${password}_new` })
-  //     .expect(HttpStatus.UNAUTHORIZED);
-  // });
+  it('/auth/reset-password (POST)', async () => {
+    /*
+    * Test reset password sucessfully.
+    */
+    await request(app.getHttpServer())
+      .post('/auth/reset-password')
+      .send({ phone: existingPhone, new_password: `${password}_new` })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.user.id).toEqual(userId);
+        expect(response.body).not.toHaveProperty('password');
+      });
+    // Try to login again with old password and expect to get bad request.
+    await request(app.getHttpServer())
+     .post('/auth/login')
+     .send({ phone: existingPhone, password })
+     .expect(HttpStatus.BAD_REQUEST);
+    // Try to login with new password and expect to get OK
+     await request(app.getHttpServer())
+     .post('/auth/login')
+     .send({ phone: existingPhone, password: `${password}_new` })
+     .expect(HttpStatus.OK)
+     .expect((response) => {
+        expect(response.body.user.id).toEqual(userId);
+        expect(response.body).not.toHaveProperty('password');
+      });
+  });
 
   afterEach(async () => {
     await resetUserDb(userRepository);
