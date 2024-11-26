@@ -52,7 +52,7 @@ export class ChatBoxService {
         },
         order: {
           latest_updated_date: 'DESC',
-          chatbox_chatlogs: { created_date: 'DESC' },
+          chatbox_chatlogs: { chat_log: { created_date: 'DESC' } },
         },
       });
 
