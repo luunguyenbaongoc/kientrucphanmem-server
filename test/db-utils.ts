@@ -14,14 +14,21 @@ export const resetUserDb = async (userRepository: any) => {
   await userRepository.delete({});
 };
 
-export const resetGroupDb = async (groupRepository: any) => {
-  await groupRepository.manager.query(
+export const resetGroupDb = async (
+  groupRepository: any,
+  groupMembersRepository: any,
+) => {
+  await groupMembersRepository.manager.query(
     'DELETE FROM group_members WHERE group_id IS NOT NULL',
   );
+  await groupMembersRepository.delete({});
   await groupRepository.delete({});
 };
 
-export const resetFriendDb = async (friendRepository: any, friendRequestRepository: any) => {
+export const resetFriendDb = async (
+  friendRepository: any,
+  friendRequestRepository: any,
+) => {
   await friendRequestRepository.manager.query(
     'DELETE FROM friend_request WHERE from_user IS NOT NULL OR to_user IS NOT NULL',
   );

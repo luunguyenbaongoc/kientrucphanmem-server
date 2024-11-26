@@ -18,6 +18,8 @@ import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
 import { RemoveMembersDto } from './dto/remove-members.dto';
 import { FindByGroupResult } from './types';
+import { GroupStatusService } from '../group_status/group_status.service';
+import { GroupStatus } from 'src/entities/group_status.entity';
 
 @Injectable()
 export class GroupMembersService {
@@ -26,6 +28,7 @@ export class GroupMembersService {
     private groupMembersRepository: Repository<GroupMembers>,
     private userService: UserService,
     private friendService: FriendService,
+    private groupStatusService: GroupStatusService,
     @Inject(forwardRef(() => GroupService))
     private groupService: GroupService,
     private dataSource: DataSource,
@@ -92,7 +95,11 @@ export class GroupMembersService {
         removeMembersDto.group_id,
       );
       if (!isGroupAdmin) {
-        return false;
+        throw new AppError(
+          HttpStatus.UNAUTHORIZED,
+          ErrorCode.UNAUTHORIZED,
+          'Bạn không có quyền xoá người dùng khỏi nhóm. Liên hệ chủ nhóm để thực hiện.',
+        );
       }
       if (removeMembersDto.user_ids.indexOf(userId) !== -1) {
         // Can't delete admin user
@@ -120,12 +127,16 @@ export class GroupMembersService {
   ): Promise<any> {
     try {
       const searchText = findByUserDto.searchText || '';
+      const groupStatus: GroupStatus =
+        await this.groupStatusService.findByCodeAndCheckExist(
+          GroupStatusCode.ACTIVE,
+        );
       const groupMembers: GroupMembers[] =
         await this.groupMembersRepository.find({
           where: {
             user_id: userId,
             group: {
-              code: GroupStatusCode.ACTIVE,
+              group_status_id: groupStatus.id,
               name: ILike(`%${searchText}%`),
             },
           },
@@ -156,6 +167,18 @@ export class GroupMembersService {
         await this.groupMembersRepository.find({
           where: { group_id: groupId },
           relations: ['user.profile'],
+          select: {
+            user_id: true,
+            group_id: true,
+            user: {
+              id: true,
+              profile: {
+                id: true,
+                fullname: true,
+                avatar: true,
+              },
+            },
+          },
         });
 
       if (!groupMembers) {

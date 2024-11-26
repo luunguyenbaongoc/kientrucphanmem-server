@@ -7,13 +7,8 @@ import { Friend, FriendRequest, Group, User } from 'src/entities';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { FriendRequestService } from 'src/modules/friend_request/friend_request.service';
 import { GroupMembers } from 'src/entities/group_members.entity';
-import { 
-  resetUserDb, 
-  resetGroupDb, 
-  resetFriendDb 
-} from 'test/db-utils';
+import { resetUserDb, resetGroupDb, resetFriendDb } from 'test/db-utils';
 import { GroupService } from 'src/modules/group/group.service';
-import { GroupStatusService } from 'src/modules/group_status/group_status.service';
 
 describe('PrivateGroupMembersAPI (e2e)', () => {
   let app: INestApplication;
@@ -25,14 +20,18 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
   let authService: AuthService;
   let friendRequestService: FriendRequestService;
   let groupService: GroupService;
-  let groupStatusService: GroupStatusService;
   let accessToken: string;
   let adminUserId: string;
   const adminPhone: string = '0339876543';
-  let groupIds: string[] = [];
-  let userIds: string[] = [];
+  let groupIds: string[];
+  let userIds: string[];
   const groupNames: string[] = ['Group 1', 'Group 2'];
-  const userPhones: string[] = ['123456789', '123456788', '123456777', '123456666'];
+  const userPhones: string[] = [
+    '123456789',
+    '123456788',
+    '123456777',
+    '123456666',
+  ];
   const password: string = 'test-user-123';
 
   beforeAll(async () => {
@@ -49,22 +48,26 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
     authService = app.get<AuthService>(AuthService);
     friendRequestService = app.get<FriendRequestService>(FriendRequestService);
     groupService = app.get<GroupService>(GroupService);
-    groupStatusService = app.get<GroupStatusService>(GroupStatusService);
-    await resetGroupDb(groupRepository);
     await resetUserDb(userRepository);
     await resetFriendDb(friendRepository, friendRequestRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
     await app.init();
   });
 
   beforeEach(async () => {
-    userPhones.forEach(async (phone, index) =>{
-      const { user: { id } } = await authService.register({
-        fullname: `John Doe ${index}`,
-        phone: phone,
+    userIds = [];
+    groupIds = [];
+    for (let i: number = 0; i < userPhones.length; i++) {
+      const {
+        user: { id },
+      } = await authService.register({
+        fullname: `John Doe ${i}`,
+        phone: userPhones[i],
         password: password,
       });
       userIds.push(id);
-    });
+    }
+
     await authService.register({
       fullname: 'Admin',
       phone: adminPhone,
@@ -82,9 +85,12 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
     // Make friend for user and admin (DO NOT user forEach here because it may cause problems
     // with consistency of database).
     for (let i = 0; i < userPhones.length; i++) {
-      const { id: requestId } = await friendRequestService.makeRequest(adminUserId, {
-        to_user_phone: userPhones[i],
-      });
+      const { id: requestId } = await friendRequestService.makeRequest(
+        adminUserId,
+        {
+          to_user_phone: userPhones[i],
+        },
+      );
       await friendRequestService.acceptRequest(requestId);
     }
     // Create 2 groups the first 2 users in group 1 and 2 others left in group 2.
@@ -110,19 +116,204 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
       .expect(HttpStatus.OK)
       .expect((response) => {
         expect(response.body).toHaveLength(2);
-        response.body.forEach(({ created_by, user_id, group_id, created_date }, index: number) => {
-          expect(created_by).toEqual(adminUserId);
-          expect(user_id).toEqual(userIds[2 + index]);
-          expect(group_id).toEqual(groupId);
-          expect(new Date(created_date).getDate()).toEqual(new Date().getDate());
+        expect(response.body).not.toHaveProperty('password');
+        response.body.forEach(
+          ({ created_by, user_id, group_id, created_date }, index: number) => {
+            expect(created_by).toEqual(adminUserId);
+            expect(user_id).toEqual(userIds[2 + index]);
+            expect(group_id).toEqual(groupId);
+            expect(new Date(created_date).getDate()).toEqual(
+              new Date().getDate(),
+            );
+          },
+        );
+      });
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(5); // include admin user.
+  });
+
+  it('/group-members (POST)', async () => {
+    /*
+     * Test add user into the group unsuccessfully since added user is
+     * not friend of admin user.
+     */
+    const otherUserPhone: string = '000000000';
+    const {
+      user: { id: otherUserId },
+    } = await authService.register({
+      fullname: 'Other user',
+      phone: otherUserPhone,
+      password: password,
+    });
+
+    const groupId: string = groupIds[0];
+    await request(app.getHttpServer())
+      .post('/group-members')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ group_id: groupId, user_ids: [otherUserId] })
+      .expect(HttpStatus.BAD_REQUEST);
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(3); // include admin user.
+  });
+
+  it('/group-members (POST)', async () => {
+    /*
+     * Test an unrelavant person trying to add people into a group unsuccessfully.
+     * This user is also not a member of that group. But they are friend of each other.
+     */
+    const {
+      body: {
+        access_token,
+        user: { id },
+      },
+    } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ phone: userPhones[0], password });
+
+    const { id: requestId } = await friendRequestService.makeRequest(id, {
+      to_user_phone: userPhones[1],
+    });
+    await friendRequestService.acceptRequest(requestId);
+
+    const groupId: string = groupIds[1];
+    await request(app.getHttpServer())
+      .post('/group-members')
+      .set('Authorization', `Bearer ${access_token}`)
+      .send({ group_id: groupId, user_ids: [userIds[1]] })
+      .expect(HttpStatus.BAD_REQUEST);
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(3);
+  });
+
+  it('/group-members/remove-members (POST)', async () => {
+    /*
+     * Test remove member from group successfully.
+     */
+    const groupId: string = groupIds[1];
+    await request(app.getHttpServer())
+      .post('/group-members/remove-members')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ group_id: groupId, user_ids: [userIds[2]] })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.text).toEqual('true');
+      });
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(2);
+  });
+
+  it('/group-members/remove-members (POST)', async () => {
+    /*
+     * Test remove member from group unsuccessfully because removed users
+     * are not group members.
+     */
+    const groupId: string = groupIds[1];
+    await request(app.getHttpServer())
+      .post('/group-members/remove-members')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ group_id: groupId, user_ids: [userIds[0], userIds[1]] })
+      .expect(HttpStatus.OK);
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(3);
+  });
+
+  it('/group-members/list-by-user (POST)', async () => {
+    /*
+     * Test retrieving group members by search text. search text is empty means
+     * return all groups of the request user.
+     */
+    await request(app.getHttpServer())
+      .post('/group-members/list-by-user')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ searchText: '' })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.count).toEqual(2);
+        expect(response.body.groups).toHaveLength(2);
+        response.body.groups.forEach((group, index: number) => {
+          expect(group.user_id).toEqual(adminUserId);
+          expect(group.group_id).toEqual(groupIds[index]);
+          expect(group.group.name).toEqual(groupNames[index]);
+          expect(group).not.toHaveProperty('user');
+        });
+      });
+
+    await request(app.getHttpServer())
+      .post('/group-members/list-by-user')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ searchText: 'Group' })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.count).toEqual(2);
+        expect(response.body.groups).toHaveLength(2);
+      });
+
+    await request(app.getHttpServer())
+      .post('/group-members/list-by-user')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ searchText: '1' })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.count).toEqual(1);
+        expect(response.body.groups).toHaveLength(1);
+      });
+
+    await request(app.getHttpServer())
+      .post('/group-members/list-by-user')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ searchText: 'ABC' })
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.count).toEqual(0);
+        expect(response.body.groups).toHaveLength(0);
+      });
+  });
+
+  it('/group-members/list-by-group/:group_id (GET)', async () => {
+    /*
+     * Test retrieving all members of a specific group.
+     */
+    await request(app.getHttpServer())
+      .get(`/group-members/list-by-group/${groupIds[1]}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.body.count).toEqual(3);
+        expect(response.body.users).toHaveLength(3);
+        const groupUserIds: string[] = [adminUserId, userIds[2], userIds[3]];
+        const groupUserNames: string[] = ['John Doe 2', 'John Doe 3', 'Admin'];
+        response.body.users.forEach((groupMember, index: number) => {
+          expect(groupUserIds).toContain(groupMember.user_id);
+          expect(groupMember.group_id).toEqual(groupIds[1]);
+          expect(groupMember.user).not.toHaveProperty('password');
+          expect(groupUserNames).toContain(
+            groupMember.user.profile[0].fullname,
+          );
+          expect(groupMember.user.profile[0].fullname).toEqual(
+            groupUserNames[index],
+          );
         });
       });
   });
 
   afterEach(async () => {
-    await resetFriendDb(friendRepository, friendRequestRepository);
-    await resetGroupDb(groupRepository);
     await resetUserDb(userRepository);
+    await resetFriendDb(friendRepository, friendRequestRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
   });
 
   afterAll(async () => {

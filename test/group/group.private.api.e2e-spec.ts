@@ -46,7 +46,7 @@ describe('PrivateGroupAPI (e2e)', () => {
     groupService = app.get<GroupService>(GroupService);
     groupStatusService = app.get<GroupStatusService>(GroupStatusService);
     await resetUserDb(userRepository);
-    await resetGroupDb(groupRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
     await app.init();
   });
 
@@ -304,7 +304,7 @@ describe('PrivateGroupAPI (e2e)', () => {
   });
 
   afterEach(async () => {
-    await resetGroupDb(groupRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
     await resetUserDb(userRepository);
   });
 

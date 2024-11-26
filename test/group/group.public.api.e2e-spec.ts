@@ -11,11 +11,13 @@ import * as path from 'path';
 import { GroupService } from 'src/modules/group/group.service';
 import { GroupStatusService } from 'src/modules/group_status/group_status.service';
 import { GroupStatusCode } from 'src/utils/enums';
+import { GroupMembers } from 'src/entities/group_members.entity';
 
 describe('PublicGroupAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
   let groupRepository: Repository<Group>;
+  let groupMembersRepository: Repository<GroupMembers>;
   let authService: AuthService;
   let groupService: GroupService;
   let groupStatusService: GroupStatusService;
@@ -34,11 +36,12 @@ describe('PublicGroupAPI (e2e)', () => {
     app = moduleFixture.createNestApplication();
     userRepository = app.get('UserRepository');
     groupRepository = app.get('GroupRepository');
+    groupMembersRepository = app.get('GroupMembersRepository');
     authService = app.get<AuthService>(AuthService);
     groupService = app.get<GroupService>(GroupService);
     groupStatusService = app.get<GroupStatusService>(GroupStatusService);
     await resetUserDb(userRepository);
-    await resetGroupDb(groupRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
     await app.init();
   });
 
@@ -109,7 +112,7 @@ describe('PublicGroupAPI (e2e)', () => {
   });
 
   afterEach(async () => {
-    await resetGroupDb(groupRepository);
+    await resetGroupDb(groupRepository, groupMembersRepository);
     await resetUserDb(userRepository);
   });
 
