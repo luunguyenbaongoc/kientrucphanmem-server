@@ -18,7 +18,7 @@ import { ErrorCode } from 'src/utils/error-code';
 import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
 import { RemoveMembersDto } from './dto/remove-members.dto';
-import { FindByGroupResult } from './types';
+import { FindByGroupResult, FindByUserResult } from './types';
 
 @Injectable()
 export class GroupMembersService {
@@ -119,7 +119,7 @@ export class GroupMembersService {
   async findByUserId(
     userId: string,
     findByUserDto: FindByUserDto,
-  ): Promise<any> {
+  ): Promise<FindByUserResult | undefined> {
     try {
       const searchText = findByUserDto.searchText || '';
       const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
@@ -134,11 +134,16 @@ export class GroupMembersService {
               name: ILike(`%${searchText}%`),
             },
           },
-          relations: ['group'],
+          relations: ['group', 'group.group_members'],
           select: {
             user_id: true,
             group_id: true,
-            group: { id: true, name: true, avatar: true },
+            group: {
+              id: true,
+              name: true,
+              avatar: true,
+              group_members: { user_id: true, group_id: true },
+            },
           },
         });
 

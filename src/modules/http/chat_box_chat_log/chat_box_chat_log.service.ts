@@ -54,7 +54,7 @@ export class ChatBoxChatLogService {
       if (chatboxId) {
         return await this.chatboxChatLogRepository.find({
           where: { chat_box_id: chatboxId },
-          relations: ['chat_log'],
+          relations: ['chat_log', 'chat_log.content_type'],
           select: {
             id: true,
             chat_box_id: true,

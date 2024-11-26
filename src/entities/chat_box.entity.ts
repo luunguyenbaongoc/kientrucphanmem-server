@@ -37,6 +37,9 @@ export class ChatBox {
   muted: boolean;
 
   @Column()
+  new_message: boolean;
+
+  @Column()
   last_accessed_date: Date;
 
   @ManyToOne(() => User, (User) => User.id, { eager: false })

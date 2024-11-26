@@ -1,13 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsDateString, IsString } from 'class-validator';
 
 export class InsertDto {
   @ApiProperty()
-  @IsString({ message: 'Không có owner_id' })
-  owner_id: string;
-
-  @ApiProperty()
-  @IsDate({ message: 'Không có created_date' })
+  @IsDateString()
   created_date: Date;
 
   @ApiProperty()

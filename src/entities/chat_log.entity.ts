@@ -13,15 +13,6 @@ export class ChatLog {
   id: string;
 
   @Column()
-  from_user: string;
-
-  @Column()
-  to_user: string;
-
-  @Column()
-  to_group: string;
-
-  @Column()
   content: string;
 
   @Column()

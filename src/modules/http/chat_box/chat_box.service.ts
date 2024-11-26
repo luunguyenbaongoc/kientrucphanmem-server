@@ -27,21 +27,29 @@ export class ChatBoxService {
           'to_user_profile',
           'to_user_profile.profile',
           'to_group_profile',
+          'to_group_profile.group_members',
+          'chatbox_chatlogs',
+          'chatbox_chatlogs.chat_log',
         ],
         select: {
           id: true,
+          latest_updated_date: true,
           last_accessed_date: true,
           to_user_profile: {
             id: true,
             profile: { id: true, avatar: true, fullname: true },
           },
           to_group_profile: {
+            id: true,
             avatar: true,
             name: true,
             description: true,
             owner_id: true,
+            group_members: { group_id: true, user_id: true },
           },
+          chatbox_chatlogs: { id: true, chat_log: { id: true, content: true } },
         },
+        order: { latest_updated_date: 'DESC' },
       });
 
       return {

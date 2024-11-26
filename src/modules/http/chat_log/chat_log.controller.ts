@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ChatLogService } from './chat_log.service';
 import { InsertDto } from './dto';
+import { AuthUser } from 'src/decorators';
 
 @Controller('chat-log')
 export class ChatLogController {
@@ -8,7 +9,7 @@ export class ChatLogController {
 
   @HttpCode(HttpStatus.OK)
   @Post('/')
-  insert(@Body() insertDto: InsertDto) {
-    return this.chatlogService.insert(insertDto);
+  insert(@AuthUser() userId: string, @Body() insertDto: InsertDto) {
+    return this.chatlogService.insert(userId, insertDto);
   }
 }
