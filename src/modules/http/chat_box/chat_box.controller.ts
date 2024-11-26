@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
 import { ChatBoxService } from './chat_box.service';
 import { AuthUser } from 'src/decorators';
 
@@ -10,5 +10,11 @@ export class ChatBoxController {
   @Get('/')
   listByUserId(@AuthUser() userId: string) {
     return this.chatboxService.listByUserId(userId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/set-seen/:chatbox_id')
+  setChatBoxSeen(@Param('chatbox_id') chatboxId: string) {
+    return this.chatboxService.setChatBoxSeen(chatboxId);
   }
 }

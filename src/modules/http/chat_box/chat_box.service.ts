@@ -35,6 +35,7 @@ export class ChatBoxService {
           id: true,
           latest_updated_date: true,
           last_accessed_date: true,
+          new_message: true,
           to_user_profile: {
             id: true,
             profile: { id: true, avatar: true, fullname: true },
@@ -49,7 +50,10 @@ export class ChatBoxService {
           },
           chatbox_chatlogs: { id: true, chat_log: { id: true, content: true } },
         },
-        order: { latest_updated_date: 'DESC' },
+        order: {
+          latest_updated_date: 'DESC',
+          chatbox_chatlogs: { created_date: 'DESC' },
+        },
       });
 
       return {
@@ -160,5 +164,18 @@ export class ChatBoxService {
       );
     }
     return chatboxById;
+  }
+
+  async setChatBoxSeen(chatboxId: string): Promise<boolean | undefined> {
+    try {
+      const chatbox = await this.findByIdAndCheckExist(chatboxId);
+      chatbox.new_message = false;
+      await this.chatboxRepository.save(chatbox);
+
+      return true;
+    } catch (ex) {
+      Logger.error(ex);
+      throw ex;
+    }
   }
 }

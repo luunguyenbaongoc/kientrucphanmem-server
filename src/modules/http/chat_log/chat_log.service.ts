@@ -75,7 +75,7 @@ export class ChatLogService {
             await queryRunner.manager.save(groupChatBox);
           }
           groupChatBox.latest_updated_date = created_date;
-          groupChatBox.new_message = true;
+          groupChatBox.new_message = user_id !== ownerId ? true : false;
           await queryRunner.manager.save(groupChatBox);
 
           const newGroupChatBoxChatLog = new ChatBoxChatLog();
@@ -96,7 +96,7 @@ export class ChatLogService {
           await queryRunner.manager.save(ownerChatBox);
         }
         ownerChatBox.latest_updated_date = created_date;
-        ownerChatBox.new_message = true;
+        // ownerChatBox.new_message = true;
         await queryRunner.manager.save(ownerChatBox);
 
         const newOwnerChatBoxChatLog = new ChatBoxChatLog();
