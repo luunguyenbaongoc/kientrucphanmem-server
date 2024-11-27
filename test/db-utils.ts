@@ -1,5 +1,8 @@
 export const resetUserDb = async (userRepository: any) => {
   await userRepository.manager.query(
+    'DELETE FROM chat_box WHERE from_user IS NOT NULL OR to_user IS NOT NULL',
+  );
+  await userRepository.manager.query(
     'DELETE FROM friend_request WHERE from_user IS NOT NULL OR to_user IS NOT NULL',
   );
   await userRepository.manager.query(
@@ -11,6 +14,9 @@ export const resetUserDb = async (userRepository: any) => {
   await userRepository.manager.query(
     'DELETE FROM profile WHERE user_id IS NOT NULL',
   );
+  await userRepository.manager.query(
+    'DELETE FROM "group" WHERE owner_id IS NOT NULL',
+  );
   await userRepository.delete({});
 };
 
@@ -18,6 +24,9 @@ export const resetGroupDb = async (
   groupRepository: any,
   groupMembersRepository: any,
 ) => {
+  await groupRepository.manager.query(
+    'DELETE FROM chat_box WHERE to_group IS NOT NULL',
+  );
   await groupMembersRepository.manager.query(
     'DELETE FROM group_members WHERE group_id IS NOT NULL',
   );
