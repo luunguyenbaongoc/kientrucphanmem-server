@@ -7,6 +7,7 @@ import { UserModule } from '../user/user.module';
 import { ChatLogContentTypeModule } from '../chat_log_content_type/chat_log_content_type.module';
 import { ChatBoxModule } from '../chat_box/chat_box.module';
 import { GroupMembersModule } from '../group_members/group_members.module';
+import { ChatModule } from 'src/modules/socket/chat/chat.module';
 
 @Module({
   providers: [ChatLogService],
@@ -17,6 +18,7 @@ import { GroupMembersModule } from '../group_members/group_members.module';
     ChatLogContentTypeModule,
     ChatBoxModule,
     GroupMembersModule,
+    ChatModule,
   ],
   exports: [ChatLogService],
 })

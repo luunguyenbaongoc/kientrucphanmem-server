@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
 import { Observable } from 'rxjs';
 import { AuthSocket } from '../types';
+import { WsEvent } from 'src/utils/enums';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -29,19 +30,17 @@ export class WsJwtGuard implements CanActivate {
   }
 
   validateToken(client: AuthSocket) {
-    const authorization =
-      client.handshake.auth?.authorization || //client.handshake.auth for real app
-      client.handshake.headers.authorization; //client.handshake.headers for postman testing
-    console.log(authorization);
-    if (!authorization) {
-      throw new WsException('Unauthorized');
+    const token =
+      client.handshake.auth?.token || //client.handshake.auth for real app
+      client.handshake.headers?.authorization?.split(' ')[1]; //client.handshake.headers for postman testing
+    if (!token) {
+      throw new WsException(WsEvent.UNAUTHORIZED);
     }
-    const token: string = authorization.split(' ')[1];
     const payload = this.jwtService.verify(token, {
       secret: process.env.ACCESS_TOKEN_SECRET,
     });
     if (!payload) {
-      throw new WsException('Unauthorized');
+      throw new WsException(WsEvent.UNAUTHORIZED);
     }
     client.user = payload;
     return payload;
