@@ -332,6 +332,7 @@ paket-files/
 
 # IDE - VSCode
 .vscode/*
+.vscode
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -397,6 +398,8 @@ Temporary Items
 .env
 .env.production
 .env.staging
+.env.test
+generate_fake_data.py
 dist
 .webpack
 .serverless/**/*.zip
