@@ -4,7 +4,7 @@ import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
-import { UpdateProfileDto } from '../profile/dto';
+import { AddProfileDto, UpdateProfileDto } from '../profile/dto';
 import { ProfileService } from '../profile/profile.service';
 
 @Injectable()
@@ -78,14 +78,14 @@ export class UserService {
 
   async createUserProfile(
     userId: string,
-    updateProfileDto: UpdateProfileDto,
+    addProfileDto: AddProfileDto,
   ): Promise<Profile> {
     const user = await this.findByIdAndCheckExist(userId);
     const newProfile = new Profile();
-    newProfile.fullname = updateProfileDto.fullname;
+    newProfile.fullname = addProfileDto.fullname;
     newProfile.user_id = userId;
     newProfile.user = user;
-    newProfile.avatar = updateProfileDto.avatar;
+    newProfile.avatar = addProfileDto.avatar;
     const profile = await this.profileService.addProfile(newProfile);
     return profile;
   }

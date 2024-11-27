@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UpdateProfileDto } from '../profile/dto';
+import { AddProfileDto } from '../profile/dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { Request } from 'express';
 
@@ -35,9 +35,9 @@ export class UserController {
   @Post('me/profiles/')
   createUserProfile(
     @Req() req: Request,
-    @Body() updateProfileDto: UpdateProfileDto,
+    @Body() addProfileDto: AddProfileDto,
   ) {
     const userId = req.user['id'];
-    return this.userService.createUserProfile(userId, updateProfileDto);
+    return this.userService.createUserProfile(userId, addProfileDto);
   }
 }

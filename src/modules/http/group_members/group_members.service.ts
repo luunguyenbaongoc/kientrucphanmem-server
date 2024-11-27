@@ -94,7 +94,11 @@ export class GroupMembersService {
         removeMembersDto.group_id,
       );
       if (!isGroupAdmin) {
-        return false;
+        throw new AppError(
+          HttpStatus.UNAUTHORIZED,
+          ErrorCode.UNAUTHORIZED,
+          'Bạn không có quyền xoá người dùng khỏi nhóm. Liên hệ chủ nhóm để thực hiện.',
+        );
       }
       if (removeMembersDto.user_ids.indexOf(userId) !== -1) {
         // Can't delete admin user

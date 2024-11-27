@@ -153,7 +153,7 @@ describe('PrivateGroupAPI (e2e)', () => {
     expect(groupMembers).toHaveLength(2);
   });
 
-  it('/group/:id (PUT)', async () => {
+  it('/group (PUT)', async () => {
     /*
      * Test updating group information.
      */
@@ -162,9 +162,10 @@ describe('PrivateGroupAPI (e2e)', () => {
       'base64',
     );
     await request(app.getHttpServer())
-      .put(`/group/${groupId}`)
+      .put(`/group`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
+        id: groupId,
         name: 'Group 4',
         description: 'This is group 4',
         avatar: base64Image,
@@ -180,15 +181,16 @@ describe('PrivateGroupAPI (e2e)', () => {
       });
   });
 
-  it('/group/:id (PUT)', async () => {
+  it('/group (PUT)', async () => {
     /*
      * Test updating group information unsuccessfully since
      * lack of key in payload.
      */
     await request(app.getHttpServer())
-      .put(`/group/${groupId}`)
+      .put(`/group`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
+        id: groupId,
         name: 'Group 4',
         description: 'This is group 4',
         group_status_code: 'active',
