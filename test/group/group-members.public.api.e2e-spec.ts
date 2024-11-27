@@ -127,8 +127,7 @@ describe('PublicGroupMembersAPI (e2e)', () => {
 
   it('/group-members/remove-members (POST)', async () => {
     /*
-     * Test remove member from group unsuccessfully because you're not authorized
-     * to remove members from this group.
+     * Test remove member not from group unsuccessfully.
      */
     const {
       body: { access_token },
@@ -140,7 +139,7 @@ describe('PublicGroupMembersAPI (e2e)', () => {
     await request(app.getHttpServer())
       .post('/group-members/remove-members')
       .set('Authorization', `Bearer ${access_token}`)
-      .send({ group_id: groupId, user_ids: [adminUserId, userIds[3]] })
+      .send({ group_id: groupId, user_ids: [adminUserId, userIds[1]] })
       .expect(HttpStatus.UNAUTHORIZED);
 
     const members = await groupMembersRepository.find({
