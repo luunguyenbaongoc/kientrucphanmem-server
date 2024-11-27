@@ -7,7 +7,6 @@ import { User } from 'src/entities';
 import { AuthService } from 'src/modules/http/auth/auth.service';
 import { resetUserDb } from 'test/db-utils';
 
-
 describe('PrivateAuthAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;

@@ -9,7 +9,6 @@ import { resetUserDb } from 'test/db-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 describe('PrivateUserAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
@@ -133,7 +132,11 @@ describe('PrivateUserAPI (e2e)', () => {
     await request(app.getHttpServer())
       .put('/profile')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ profileId: response.body[0].id, fullname: 'Jane Doe 2', avatar: base64Image })
+      .send({
+        profileId: response.body[0].id,
+        fullname: 'Jane Doe 2',
+        avatar: base64Image,
+      })
       .expect(HttpStatus.OK)
       .expect((response) => {
         expect(response.body.fullname).toEqual('Jane Doe 2');

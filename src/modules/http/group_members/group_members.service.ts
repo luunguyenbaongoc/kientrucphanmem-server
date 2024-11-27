@@ -181,7 +181,7 @@ export class GroupMembersService {
                 avatar: true,
               },
             },
-          }
+          },
         });
 
       if (!groupMembers) {

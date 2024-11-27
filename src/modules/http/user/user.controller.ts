@@ -33,10 +33,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json')
   @Post('me/profiles/')
-  createUserProfile(
-    @Req() req: Request,
-    @Body() addProfileDto: AddProfileDto,
-  ) {
+  createUserProfile(@Req() req: Request, @Body() addProfileDto: AddProfileDto) {
     const userId = req.user['id'];
     return this.userService.createUserProfile(userId, addProfileDto);
   }

@@ -13,7 +13,6 @@ import { GroupStatusService } from 'src/modules/http/group_status/group_status.s
 import { GroupStatusCode } from 'src/utils/enums';
 import { GroupMembers } from 'src/entities/group_members.entity';
 
-
 describe('PublicGroupAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;

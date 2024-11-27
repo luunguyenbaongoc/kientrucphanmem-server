@@ -14,7 +14,6 @@ import { resetUserDb, resetGroupDb } from 'test/db-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 describe('PrivateGroupAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;

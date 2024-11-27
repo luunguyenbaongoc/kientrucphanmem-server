@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io';
 import { WsJwtGuard } from '../ws-jwt/ws-jwt.guard';
 import { AuthSocket, SocketIOMiddleWare } from '../types';
 

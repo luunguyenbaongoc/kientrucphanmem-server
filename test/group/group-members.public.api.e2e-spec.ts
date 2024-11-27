@@ -10,7 +10,6 @@ import { GroupMembers } from 'src/entities/group_members.entity';
 import { resetUserDb, resetGroupDb, resetFriendDb } from 'test/db-utils';
 import { GroupService } from 'src/modules/http/group/group.service';
 
-
 describe('PublicGroupMembersAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;

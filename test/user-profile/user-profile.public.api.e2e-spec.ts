@@ -9,7 +9,6 @@ import { resetUserDb } from 'test/db-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 describe('PublicUserAPI (e2e)', () => {
   let app: INestApplication;
   let userRepository: Repository<User>;
@@ -90,7 +89,11 @@ describe('PublicUserAPI (e2e)', () => {
 
     await request(app.getHttpServer())
       .put('/profile')
-      .send({ profileId: response.body[0].id, fullname: 'Jane Doe 2', avatar: base64Image })
+      .send({
+        profileId: response.body[0].id,
+        fullname: 'Jane Doe 2',
+        avatar: base64Image,
+      })
       .expect(HttpStatus.UNAUTHORIZED);
 
     await request(app.getHttpServer())
