@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { GroupMembers } from './group_members.entity';
+import { User } from './user.entity';
 
 @Entity('group')
 export class Group {
@@ -39,9 +41,16 @@ export class Group {
   @Column({ nullable: true })
   description: string;
 
+  @Column()
+  owner_id: string;
+
   @OneToMany(() => GroupMembers, (GroupMembers) => GroupMembers.group, {
     eager: false,
   })
   @JoinColumn()
   group_members: GroupMembers[];
+
+  @ManyToOne(() => User, (User) => User.id, { eager: false })
+  @JoinColumn({ name: 'owner_id' })
+  owner: User;
 }
