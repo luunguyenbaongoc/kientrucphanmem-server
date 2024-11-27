@@ -36,13 +36,12 @@ export class GroupController {
 
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
-  @Put('/:id')
+  @Put('/')
   updateGroup(
     @AuthUser() userId: string,
-    @Param('id') id: string,
     @Body() updateGroupDto: UpdateGroupDto,
   ) {
-    return this.groupService.updateGroup(userId, id, updateGroupDto);
+    return this.groupService.updateGroup(userId, updateGroupDto);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -89,7 +88,8 @@ export class GroupController {
     @UploadedFile() file: Express.Multer.File,
     @Param('groupId') groupId: string,
   ): Promise<Group> {
-    return this.groupService.updateGroup(userId, groupId, {
+    return this.groupService.updateGroup(userId, {
+      id: groupId,
       avatar: file.path,
     } as UpdateGroupDto);
   }
