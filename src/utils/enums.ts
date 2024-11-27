@@ -14,3 +14,8 @@ export enum ChatLogContentTypeCode {
   IMAGE = 'image',
   VIDEO = 'video',
 }
+
+export enum WsEvent {
+  RECEIVE_MESSAGE = 'receive_message',
+  UNAUTHORIZED = 'unauthorized',
+}

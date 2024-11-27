@@ -9,6 +9,7 @@ import { ChatBoxService } from '../chat_box/chat_box.service';
 import { GroupMembersService } from '../group_members/group_members.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
+import { ChatGateway } from 'src/modules/socket/chat/chat.gateway';
 
 @Injectable()
 export class ChatLogService {
@@ -20,7 +21,9 @@ export class ChatLogService {
     private dataSource: DataSource,
     private chatboxService: ChatBoxService,
     private groupmembersService: GroupMembersService,
+    private chatGateway: ChatGateway,
   ) {}
+  private readonly logger = new Logger(ChatLogService.name);
 
   async insert(
     ownerId: string,
@@ -84,6 +87,20 @@ export class ChatLogService {
           newGroupChatBoxChatLog.created_date = created_date;
           await queryRunner.manager.save(newGroupChatBoxChatLog);
         }
+
+        await queryRunner.commitTransaction();
+
+        //send socket to users in group except owner when all messages were saved to db
+        for (const user of users) {
+          if (user.user_id !== ownerId) {
+            this.chatGateway.sendCreatedMessage(
+              ownerId,
+              user.user_id,
+              to_id,
+              true,
+            );
+          }
+        }
       } else {
         let ownerChatBox = await this.chatboxService.findOneBy(owner_id, to_id);
         if (!ownerChatBox) {
@@ -127,13 +144,16 @@ export class ChatLogService {
         newToUserChatBoxChatLog.chat_log_id = newChatLog.id;
         newToUserChatBoxChatLog.created_date = created_date;
         await queryRunner.manager.save(newToUserChatBoxChatLog);
-      }
 
-      await queryRunner.commitTransaction();
+        await queryRunner.commitTransaction();
+
+        //send socket to user when message is saved to db
+        this.chatGateway.sendCreatedMessage(ownerId, to_id, ownerId, false);
+      }
 
       return newChatLog;
     } catch (ex) {
-      Logger.error(ex);
+      this.logger.error(ex);
       await queryRunner.rollbackTransaction();
       throw ex;
     } finally {

@@ -7,5 +7,6 @@ import { JwtModule } from '@nestjs/jwt';
 @Module({
   imports: [WsAuthModule, JwtModule],
   providers: [ChatService, ChatGateway],
+  exports: [ChatGateway],
 })
 export class ChatModule {}
