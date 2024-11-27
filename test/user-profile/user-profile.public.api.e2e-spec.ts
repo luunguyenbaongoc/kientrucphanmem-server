@@ -76,7 +76,7 @@ describe('PublicUserAPI (e2e)', () => {
       });
   });
 
-  it('/profile/profiles/:profileId (authenticated required) (PATCH)', async () => {
+  it('/profile (authenticated required) (PUT)', async () => {
     /*
      * Test update user profile unsuccessfully because of authentication required.
      */
@@ -89,8 +89,8 @@ describe('PublicUserAPI (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`);
 
     await request(app.getHttpServer())
-      .patch(`/profile/profiles/${response.body[0].id}`)
-      .send({ fullname: 'Jane Doe 2', avatar: base64Image })
+      .put('/profile')
+      .send({ profileId: response.body[0].id, fullname: 'Jane Doe 2', avatar: base64Image })
       .expect(HttpStatus.UNAUTHORIZED);
 
     await request(app.getHttpServer())

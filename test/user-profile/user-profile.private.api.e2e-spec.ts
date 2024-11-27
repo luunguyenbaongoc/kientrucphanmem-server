@@ -120,7 +120,7 @@ describe('PrivateUserAPI (e2e)', () => {
       });
   });
 
-  it('/profile/profiles/:profileId (PATCH)', async () => {
+  it('/profile (Put)', async () => {
     // Create a dummy image for avatar
     const base64Image = fs.readFileSync(
       path.join(__dirname, '../../src/images/default-avatar1.jpg'),
@@ -131,9 +131,9 @@ describe('PrivateUserAPI (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`);
 
     await request(app.getHttpServer())
-      .patch(`/profile/profiles/${response.body[0].id}`)
+      .put('/profile')
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({ fullname: 'Jane Doe 2', avatar: base64Image })
+      .send({ profileId: response.body[0].id, fullname: 'Jane Doe 2', avatar: base64Image })
       .expect(HttpStatus.OK)
       .expect((response) => {
         expect(response.body.fullname).toEqual('Jane Doe 2');

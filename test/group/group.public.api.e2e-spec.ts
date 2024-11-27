@@ -80,7 +80,7 @@ describe('PublicGroupAPI (e2e)', () => {
       .expect(HttpStatus.UNAUTHORIZED);
   });
 
-  it('/group/:id (PUT)', async () => {
+  it('/group (PUT)', async () => {
     /*
      * Test updating group information unsuccessfully because of
      * unauthenticated user.
@@ -90,8 +90,9 @@ describe('PublicGroupAPI (e2e)', () => {
       'base64',
     );
     await request(app.getHttpServer())
-      .put(`/group/${groupId}`)
+      .put(`/group`)
       .send({
+        id: groupId,
         name: 'Group 4',
         description: 'This is group 4',
         avatar: base64Image,
