@@ -166,6 +166,18 @@ export class GroupMembersService {
         await this.groupMembersRepository.find({
           where: { group_id: groupId },
           relations: ['user.profile'],
+          select: {
+            user_id: true,
+            group_id: true,
+            user: {
+              id: true,
+              profile: {
+                id: true,
+                fullname: true,
+                avatar: true,
+              },
+            },
+          }
         });
 
       if (!groupMembers) {
