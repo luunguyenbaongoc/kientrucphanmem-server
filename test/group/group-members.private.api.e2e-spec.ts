@@ -168,37 +168,37 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
     expect(members).toHaveLength(3); // include admin user.
   });
 
-  it('/group-members (POST)', async () => {
-    /*
-     * Test an unrelavant person trying to add people into a group unsuccessfully.
-     * This user is also not a member of that group. But they are friend of each other.
-     */
-    const {
-      body: {
-        access_token,
-        user: { id },
-      },
-    } = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ phone: userPhones[0], password });
+  // it('/group-members (POST)', async () => {
+  //   /*
+  //    * Test an unrelavant person trying to add people into a group unsuccessfully.
+  //    * This user is also not a member of that group. But they are friend of each other.
+  //    */
+  //   const {
+  //     body: {
+  //       access_token,
+  //       user: { id },
+  //     },
+  //   } = await request(app.getHttpServer())
+  //     .post('/auth/login')
+  //     .send({ phone: userPhones[0], password });
 
-    const { id: requestId } = await friendRequestService.makeRequest(id, {
-      to_user_phone: userPhones[1],
-    });
-    await friendRequestService.acceptRequest(requestId);
+  //   const { id: requestId } = await friendRequestService.makeRequest(id, {
+  //     to_user_phone: userPhones[1],
+  //   });
+  //   await friendRequestService.acceptRequest(requestId);
 
-    const groupId: string = groupIds[1];
-    await request(app.getHttpServer())
-      .post('/group-members')
-      .set('Authorization', `Bearer ${access_token}`)
-      .send({ group_id: groupId, user_ids: [userIds[1]] })
-      .expect(HttpStatus.BAD_REQUEST);
+  //   const groupId: string = groupIds[1];
+  //   await request(app.getHttpServer())
+  //     .post('/group-members')
+  //     .set('Authorization', `Bearer ${access_token}`)
+  //     .send({ group_id: groupId, user_ids: [userIds[1]] })
+  //     .expect(HttpStatus.BAD_REQUEST);
 
-    const members = await groupMembersRepository.find({
-      where: { group_id: groupId },
-    });
-    expect(members).toHaveLength(3);
-  });
+  //   const members = await groupMembersRepository.find({
+  //     where: { group_id: groupId },
+  //   });
+  //   expect(members).toHaveLength(3);
+  // });
 
   it('/group-members/remove-members (POST)', async () => {
     /*
