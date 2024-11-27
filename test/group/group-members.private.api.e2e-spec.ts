@@ -9,6 +9,9 @@ import { FriendRequestService } from 'src/modules/http/friend_request/friend_req
 import { GroupMembers } from 'src/entities/group_members.entity';
 import { resetUserDb, resetGroupDb, resetFriendDb } from 'test/db-utils';
 import { GroupService } from 'src/modules/http/group/group.service';
+import { GroupMembersService } from 'src/modules/http/group_members/group_members.service';
+import { GroupStatusCode } from 'src/utils/enums';
+import { GroupStatusService } from 'src/modules/http/group_status/group_status.service';
 
 describe('PrivateGroupMembersAPI (e2e)', () => {
   let app: INestApplication;
@@ -20,6 +23,8 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
   let authService: AuthService;
   let friendRequestService: FriendRequestService;
   let groupService: GroupService;
+  let groupMemberService: GroupMembersService;
+  let groupStatusService: GroupStatusService;
   let accessToken: string;
   let adminUserId: string;
   const adminPhone: string = '0339876543';
@@ -48,6 +53,8 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
     authService = app.get<AuthService>(AuthService);
     friendRequestService = app.get<FriendRequestService>(FriendRequestService);
     groupService = app.get<GroupService>(GroupService);
+    groupMemberService = app.get<GroupMembersService>(GroupMembersService);
+    groupStatusService = app.get<GroupStatusService>(GroupStatusService);
     await resetUserDb(userRepository);
     await resetFriendDb(friendRepository, friendRequestRepository);
     await resetGroupDb(groupRepository, groupMembersRepository);
@@ -161,37 +168,37 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
     expect(members).toHaveLength(3); // include admin user.
   });
 
-  // it('/group-members (POST)', async () => {
-  //   /*
-  //    * Test an unrelavant person trying to add people into a group unsuccessfully.
-  //    * This user is also not a member of that group. But they are friend of each other.
-  //    */
-  //   const {
-  //     body: {
-  //       access_token,
-  //       user: { id },
-  //     },
-  //   } = await request(app.getHttpServer())
-  //     .post('/auth/login')
-  //     .send({ phone: userPhones[0], password });
+  it('/group-members (POST)', async () => {
+    /*
+     * Test an unrelavant person trying to add people into a group unsuccessfully.
+     * This user is also not a member of that group. But they are friend of each other.
+     */
+    const {
+      body: {
+        access_token,
+        user: { id },
+      },
+    } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ phone: userPhones[0], password });
 
-  //   const { id: requestId } = await friendRequestService.makeRequest(id, {
-  //     to_user_phone: userPhones[1],
-  //   });
-  //   await friendRequestService.acceptRequest(requestId);
+    const { id: requestId } = await friendRequestService.makeRequest(id, {
+      to_user_phone: userPhones[1],
+    });
+    await friendRequestService.acceptRequest(requestId);
 
-  //   const groupId: string = groupIds[1];
-  //   await request(app.getHttpServer())
-  //     .post('/group-members')
-  //     .set('Authorization', `Bearer ${access_token}`)
-  //     .send({ group_id: groupId, user_ids: [userIds[1]] })
-  //     .expect(HttpStatus.BAD_REQUEST);
+    const groupId: string = groupIds[1];
+    await request(app.getHttpServer())
+      .post('/group-members')
+      .set('Authorization', `Bearer ${access_token}`)
+      .send({ group_id: groupId, user_ids: [userIds[1]] })
+      .expect(HttpStatus.BAD_REQUEST);
 
-  //   const members = await groupMembersRepository.find({
-  //     where: { group_id: groupId },
-  //   });
-  //   expect(members).toHaveLength(3);
-  // });
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(3);
+  });
 
   it('/group-members/remove-members (POST)', async () => {
     /*
@@ -296,7 +303,7 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
         expect(response.body.users).toHaveLength(3);
         const groupUserIds: string[] = [adminUserId, userIds[2], userIds[3]];
         const groupUserNames: string[] = ['John Doe 2', 'John Doe 3', 'Admin'];
-        response.body.users.forEach((groupMember, index: number) => {
+        response.body.users.sort(u => u.user.profile[0].fullname).forEach((groupMember, index: number) => {
           expect(groupUserIds).toContain(groupMember.user_id);
           expect(groupMember.group_id).toEqual(groupIds[1]);
           expect(groupMember.user).not.toHaveProperty('password');
@@ -308,6 +315,87 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
           );
         });
       });
+  });
+
+  it('/leave-group/:group_id (Get)', async () => {
+    /*
+     * Test normal member of a group leave that group.
+     */
+    const {
+      body: { access_token },
+    } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ phone: userPhones[0], password });
+
+    const groupId: string = groupIds[0];
+    await request(app.getHttpServer())
+      .get(`/group-members/leave-group/${groupId}`)
+      .set('Authorization', `Bearer ${access_token}`)
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.text).toEqual('true');
+      });
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(2);
+  });
+
+  it('/leave-group/:group_id (Get)', async () => {
+    /*
+     * Test admin user of a group trying to leave that group.
+     * Expect the group still has members so promote one of them to
+     * be a group owner.
+     */
+    const groupId: string = groupIds[0];
+    await request(app.getHttpServer())
+      .get(`/group-members/leave-group/${groupId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.text).toEqual('true');
+      });
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(2);
+    const group = await groupRepository.findOne({ where: { id: groupId}});
+    const { id } = await groupStatusService.findByCode(GroupStatusCode.ACTIVE);
+    expect([userIds[0], userIds[1]]).toContain(group.owner_id);
+    expect(group.group_status_id).toEqual(id);
+  });
+
+  it('/leave-group/:group_id (Get)', async () => {
+    /*
+     * Test admin user trying to leave the of of only him left.
+     * Expect the group status should be INACTIVE.
+     */
+    const groupId: string = groupIds[0];
+    await groupMemberService.removeMembers(adminUserId, { 
+      group_id: groupId, 
+      user_ids: [ userIds[0], userIds[1] ] 
+    });
+    expect(await groupMembersRepository.find({
+      where: { group_id: groupId },
+    })
+    ).toHaveLength(1);
+    await request(app.getHttpServer())
+      .get(`/group-members/leave-group/${groupId}`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(HttpStatus.OK)
+      .expect((response) => {
+        expect(response.text).toEqual('true');
+      });
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(0);
+    const group = await groupRepository.findOne({ where: { id: groupId}});
+    const { id } = await groupStatusService.findByCode(GroupStatusCode.INACTIVE);
+    expect(group.group_status_id).toEqual(id);
   });
 
   afterEach(async () => {

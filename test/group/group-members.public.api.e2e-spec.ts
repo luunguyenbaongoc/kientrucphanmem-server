@@ -148,6 +148,29 @@ describe('PublicGroupMembersAPI (e2e)', () => {
     expect(members).toHaveLength(3);
   });
 
+  it('/leave-group/:group_id (Get)', async () => {
+    /*
+     * Test user who is not member of the group trying to 
+     * request leaving group.
+     */
+    const {
+      body: { access_token },
+    } = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ phone: userPhones[0], password });
+
+    const groupId: string = groupIds[1];
+    await request(app.getHttpServer())
+      .get(`/group-members/leave-group/${groupId}`)
+      .set('Authorization', `Bearer ${access_token}`)
+      .expect(HttpStatus.BAD_REQUEST);
+
+    const members = await groupMembersRepository.find({
+      where: { group_id: groupId },
+    });
+    expect(members).toHaveLength(3);
+  });
+
   afterEach(async () => {
     await resetUserDb(userRepository);
     await resetFriendDb(friendRepository, friendRequestRepository);

@@ -42,6 +42,18 @@ export class GroupMembersService {
       await this.userService.findByIdAndCheckExist(uerId);
       await this.groupService.findByIdAndCheckExist(addMembersDto.group_id);
 
+      const member = await this.groupMembersRepository.findOneBy({
+        user_id: uerId,
+        group_id: addMembersDto.group_id,
+      });
+      if (!member) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          'Bạn không thuộc về nhóm này'
+        );
+      }
+
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
