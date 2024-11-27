@@ -4,14 +4,15 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { Repository } from 'typeorm';
 import { Group, User } from 'src/entities';
-import { AuthService } from 'src/modules/auth/auth.service';
+import { AuthService } from 'src/modules/http/auth/auth.service';
 import { resetUserDb, resetGroupDb } from 'test/db-utils';
 import * as fs from 'fs';
 import * as path from 'path';
-import { GroupService } from 'src/modules/group/group.service';
-import { GroupStatusService } from 'src/modules/group_status/group_status.service';
+import { GroupService } from 'src/modules/http/group/group.service';
+import { GroupStatusService } from 'src/modules/http/group_status/group_status.service';
 import { GroupStatusCode } from 'src/utils/enums';
 import { GroupMembers } from 'src/entities/group_members.entity';
+
 
 describe('PublicGroupAPI (e2e)', () => {
   let app: INestApplication;

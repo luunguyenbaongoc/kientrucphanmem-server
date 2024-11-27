@@ -4,11 +4,12 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { Repository } from 'typeorm';
 import { Friend, FriendRequest, Group, User } from 'src/entities';
-import { AuthService } from 'src/modules/auth/auth.service';
-import { FriendRequestService } from 'src/modules/friend_request/friend_request.service';
+import { AuthService } from 'src/modules/http/auth/auth.service';
+import { FriendRequestService } from 'src/modules/http/friend_request/friend_request.service';
 import { GroupMembers } from 'src/entities/group_members.entity';
 import { resetUserDb, resetGroupDb, resetFriendDb } from 'test/db-utils';
-import { GroupService } from 'src/modules/group/group.service';
+import { GroupService } from 'src/modules/http/group/group.service';
+
 
 describe('PublicGroupMembersAPI (e2e)', () => {
   let app: INestApplication;

@@ -4,8 +4,9 @@ import * as request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { Repository } from 'typeorm';
 import { User } from 'src/entities';
-import { AuthService } from 'src/modules/auth/auth.service';
+import { AuthService } from 'src/modules/http/auth/auth.service';
 import { resetUserDb } from 'test/db-utils';
+
 
 describe('PublicAuthAPI (e2e)', () => {
   let app: INestApplication;
