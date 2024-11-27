@@ -16,7 +16,16 @@ export class UserService {
   ) {}
 
   async findByPhone(phone: string): Promise<User | undefined> {
-    return await this.userRepository.findOneBy({ phone });
+    return await this.userRepository.findOne({
+      where: { phone },
+      relations: ['profile'],
+      select: {
+        id: true,
+        phone: true,
+        active: true,
+        profile: { id: true, avatar: true, fullname: true },
+      },
+    });
   }
 
   async findByPhoneAndCheckExist(phone: string): Promise<User | undefined> {

@@ -29,6 +29,13 @@ export class FriendRequestService {
     try {
       const { to_user_phone } = makeRequestDto;
       const from_user = await this.userService.findByIdAndCheckExist(userId);
+      if (to_user_phone === from_user.phone) {
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Không thể gửi lời mời kết bạn tới chính bản thân mình.`,
+        );
+      }
       const to_user = await this.userService.findByPhoneAndCheckExist(
         to_user_phone,
       );

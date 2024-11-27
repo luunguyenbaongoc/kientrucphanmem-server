@@ -7,6 +7,7 @@ import {
   HttpCode,
   UseGuards,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UserService } from './user.service';
@@ -39,5 +40,11 @@ export class UserController {
   ) {
     const userId = req.user['id'];
     return this.userService.createUserProfile(userId, updateProfileDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/find-by-phone/:phone')
+  findByPhone(@Param('phone') phone: string) {
+    return this.userService.findByPhone(phone);
   }
 }
