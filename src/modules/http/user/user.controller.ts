@@ -44,7 +44,7 @@ export class UserController {
 
   @HttpCode(HttpStatus.OK)
   @Get('/find-by-phone/:phone')
-  findByPhone(@Param('phone') phone: string) {
-    return this.userService.findByPhone(phone);
+  findUserInfoByPhone(@Param('phone') phone: string) {
+    return this.userService.findUserInfoByPhone(phone);
   }
 }

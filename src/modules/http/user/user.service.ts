@@ -16,6 +16,10 @@ export class UserService {
   ) {}
 
   async findByPhone(phone: string): Promise<User | undefined> {
+    return await this.userRepository.findOneBy({ phone });
+  }
+
+  async findUserInfoByPhone(phone: string): Promise<User | undefined> {
     return await this.userRepository.findOne({
       where: { phone },
       relations: ['profile'],
