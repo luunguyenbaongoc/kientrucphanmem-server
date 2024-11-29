@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatBoxChatLog } from 'src/entities';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { GetChatBoxDetailDto } from './dto';
@@ -60,16 +60,22 @@ export class ChatBoxChatLogService {
             GroupStatusCode.ACTIVE,
           );
         return await this.chatboxChatLogRepository.find({
-          where: {
-            chat_box_id: chatboxId,
-            chat_box: { to_group_profile: { group_status_id: groupStatus.id } },
-          },
-          relations: [
-            'chat_box',
-            'chat_box.to_group_profile',
-            'chat_log',
-            'chat_log.content_type',
+          where: [
+            {
+              chat_box_id: chatboxId,
+              chat_box: {
+                to_group_profile: { group_status_id: groupStatus.id },
+                to_user_profile: IsNull(),
+              },
+            },
+            {
+              chat_box_id: chatboxId,
+              chat_box: {
+                to_group_profile: IsNull(),
+              },
+            },
           ],
+          relations: ['chat_box', 'chat_log', 'chat_log.content_type'],
           select: {
             id: true,
             chat_box_id: true,
