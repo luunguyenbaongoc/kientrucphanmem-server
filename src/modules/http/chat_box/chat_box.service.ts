@@ -2,7 +2,7 @@ import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatBox } from 'src/entities';
 import { UserService } from '../user/user.service';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { ListByUserResult } from './types/list-by-user';
 import { GroupService } from '../group/group.service';
 import { AppError } from 'src/utils/AppError';
@@ -28,11 +28,19 @@ export class ChatBoxService {
         GroupStatusCode.ACTIVE,
       );
       const chatboxList = await this.chatboxRepository.find({
-        where: {
-          from_user: userId,
-          deleted: false,
-          to_group_profile: { group_status_id: groupStatus.id },
-        },
+        where: [
+          {
+            from_user: userId,
+            deleted: false,
+            to_user_profile: IsNull(),
+            to_group_profile: { group_status_id: groupStatus.id },
+          },
+          {
+            from_user: userId,
+            deleted: false,
+            to_group_profile: IsNull(),
+          },
+        ],
         relations: [
           'to_user_profile',
           'to_user_profile.profile',
