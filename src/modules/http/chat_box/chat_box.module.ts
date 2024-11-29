@@ -5,11 +5,17 @@ import { ChatBox } from 'src/entities';
 import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupModule } from '../group/group.module';
+import { GroupStatusModule } from '../group_status/group_status.module';
 
 @Module({
   providers: [ChatBoxService],
   controllers: [ChatBoxController],
-  imports: [TypeOrmModule.forFeature([ChatBox]), UserModule, GroupModule],
+  imports: [
+    TypeOrmModule.forFeature([ChatBox]),
+    UserModule,
+    GroupModule,
+    GroupStatusModule,
+  ],
   exports: [ChatBoxService],
 })
 export class ChatBoxModule {}

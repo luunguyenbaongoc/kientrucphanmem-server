@@ -6,6 +6,8 @@ import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { GetChatBoxDetailDto } from './dto';
 import { ChatBoxService } from '../chat_box/chat_box.service';
+import { GroupStatusCode } from 'src/utils/enums';
+import { GroupStatusService } from '../group_status/group_status.service';
 
 @Injectable()
 export class ChatBoxChatLogService {
@@ -15,6 +17,7 @@ export class ChatBoxChatLogService {
     private userService: UserService,
     private groupService: GroupService,
     private chatboxService: ChatBoxService,
+    private groupStatusService: GroupStatusService,
   ) {}
 
   async getChatBoxDetailBy(
@@ -52,9 +55,21 @@ export class ChatBoxChatLogService {
         }
       }
       if (chatboxId) {
+        const groupStatus =
+          await this.groupStatusService.findByCodeAndCheckExist(
+            GroupStatusCode.ACTIVE,
+          );
         return await this.chatboxChatLogRepository.find({
-          where: { chat_box_id: chatboxId },
-          relations: ['chat_log', 'chat_log.content_type'],
+          where: {
+            chat_box_id: chatboxId,
+            chat_box: { to_group_profile: { group_status_id: groupStatus.id } },
+          },
+          relations: [
+            'chat_box',
+            'chat_box.to_group_profile',
+            'chat_log',
+            'chat_log.content_type',
+          ],
           select: {
             id: true,
             chat_box_id: true,
