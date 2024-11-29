@@ -142,6 +142,7 @@ export class GroupMembersService {
               id: true,
               name: true,
               avatar: true,
+              owner_id: true,
               group_members: { user_id: true, group_id: true },
             },
           },
