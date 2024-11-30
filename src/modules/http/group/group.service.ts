@@ -113,18 +113,23 @@ export class GroupService {
     updateGroupDto: UpdateGroupDto,
   ): Promise<Group | undefined> {
     try {
+      const { id, avatar, description, group_status_code, name } =
+        updateGroupDto;
       await this.userService.findByIdAndCheckExist(userId);
-      const group = await this.findByIdAndCheckExist(updateGroupDto.id);
-      const groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
-        updateGroupDto.group_status_code,
-      );
+      const group = await this.findByIdAndCheckExist(id);
+      let groupStatus;
+      if (group_status_code) {
+        groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
+          group_status_code,
+        );
+      }
 
-      group.name = updateGroupDto.name || group.name;
-      group.group_status_id = groupStatus.id;
-      group.avatar = updateGroupDto.avatar || group.avatar;
+      group.name = name || group.name;
+      group.group_status_id = groupStatus || group.group_status_id;
+      group.avatar = avatar || group.avatar;
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
-      group.description = updateGroupDto.description || group.description;
+      group.description = description || group.description;
 
       await this.groupRepository.save(group);
 
