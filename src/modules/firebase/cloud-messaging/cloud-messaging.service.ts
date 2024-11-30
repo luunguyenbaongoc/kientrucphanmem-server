@@ -39,7 +39,6 @@ export class CloudMessagingService {
   ): Promise<void> {
     try {
       const { data, title, content, tokens } = sendMulticastMessageFireBaseDto;
-
       if (tokens.length > 0) {
         await firebase.messaging().sendEachForMulticast({
           notification: {
@@ -47,7 +46,7 @@ export class CloudMessagingService {
             body: content,
           },
           tokens: tokens,
-          data: data,
+          data: {},
           android: { priority: 'high' },
         });
       }

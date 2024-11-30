@@ -179,4 +179,14 @@ export class UserService {
       throw ex;
     }
   }
+
+  async getFirebaseTokenList(userId: string): Promise<string[] | undefined> {
+    try {
+      const user = await this.findByIdAndCheckExist(userId);
+      return user.firebase_token_list;
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
+  }
 }

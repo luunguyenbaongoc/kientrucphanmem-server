@@ -19,3 +19,8 @@ export enum WsEvent {
   RECEIVE_MESSAGE = 'receive_message',
   UNAUTHORIZED = 'unauthorized',
 }
+
+export enum Platform {
+  MOBILE = 'mobile',
+  WEB = 'web',
+}
