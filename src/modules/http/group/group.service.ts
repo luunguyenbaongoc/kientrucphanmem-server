@@ -117,15 +117,15 @@ export class GroupService {
         updateGroupDto;
       await this.userService.findByIdAndCheckExist(userId);
       const group = await this.findByIdAndCheckExist(id);
-      let groupStatus;
       if (group_status_code) {
-        groupStatus = await this.groupStatusService.findByCodeAndCheckExist(
-          group_status_code,
-        );
+        const groupStatus =
+          await this.groupStatusService.findByCodeAndCheckExist(
+            group_status_code,
+          );
+        group.group_status_id = groupStatus.id;
       }
 
       group.name = name || group.name;
-      group.group_status_id = groupStatus || group.group_status_id;
       group.avatar = avatar || group.avatar;
       group.latest_updated_by = userId;
       group.latest_updated_date = new Date();
