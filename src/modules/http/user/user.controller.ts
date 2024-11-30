@@ -14,6 +14,8 @@ import { UserService } from './user.service';
 import { UpdateProfileDto } from '../profile/dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { Request } from 'express';
+import { AuthUser, Public } from 'src/decorators';
+import { FirebaseTokenDto } from './dto';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -46,5 +48,21 @@ export class UserController {
   @Get('/find-by-phone/:phone')
   findUserInfoByPhone(@Param('phone') phone: string) {
     return this.userService.findUserInfoByPhone(phone);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/add-firebase-token')
+  addFirebaseToken(
+    @AuthUser() userId,
+    @Body() firebaseTokenDto: FirebaseTokenDto,
+  ) {
+    return this.userService.addFirebaseToken(userId, firebaseTokenDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('/remove-firebase-token')
+  removeFirebaseToken(@Body() firebaseTokenDto: FirebaseTokenDto) {
+    return this.userService.removeFirebaseToken(firebaseTokenDto);
   }
 }
