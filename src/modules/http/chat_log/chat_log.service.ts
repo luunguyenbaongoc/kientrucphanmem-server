@@ -101,13 +101,20 @@ export class ChatLogService {
 
         //send socket to users in group except owner when all messages were saved to db
         for (const user of users) {
+          const toUserId = user.user_id;
           if (user.user_id !== ownerId) {
-            this.chatGateway.sendCreatedMessage(
-              ownerId,
-              user.user_id,
-              to_id,
-              true,
-            );
+            this.chatGateway.sendCreatedMessage(ownerId, toUserId, to_id, true);
+          }
+          const firebaseTokenList = await this.userService.getFirebaseTokenList(
+            toUserId,
+          );
+          if (firebaseTokenList.length > 0) {
+            this.cloudMessagingService.sendMulticastMessage({
+              content: 'Tin nhắn mới',
+              title: 'Tin nhắn mới',
+              tokens: firebaseTokenList,
+              data: { payloadId: to_id, isGroupChat: true.toString() },
+            });
           }
         }
       } else {
@@ -166,14 +173,14 @@ export class ChatLogService {
             content: 'Tin nhắn mới',
             title: 'Tin nhắn mới',
             tokens: firebaseTokenList,
-            data: { payloadId: ownerId, isGroupChat: false },
+            data: { payloadId: ownerId, isGroupChat: false.toString() },
           });
         }
       }
 
       if (platform === Platform.MOBILE) {
         //send socket to sender when sent message from mobile
-        this.chatGateway.sendCreatedMessage(ownerId, to_id, ownerId, false);
+        this.chatGateway.sendMessageToOwner(ownerId, ownerId, false);
       } else {
         //send firebase message to sender when sent message from web
         const firebaseTokenList = await this.userService.getFirebaseTokenList(
