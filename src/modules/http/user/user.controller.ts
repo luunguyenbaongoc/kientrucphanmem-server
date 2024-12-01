@@ -27,8 +27,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json')
   @Get('me/profiles/')
-  getUserProfiles(@Req() req: Request) {
-    const userId = req.user['id'];
+  getUserProfiles(@AuthUser() userId: string) {
+    // const userId = req.user['id'];
     return this.userService.getUserProfiles(userId);
   }
 
@@ -64,5 +64,11 @@ export class UserController {
   @Post('/remove-firebase-token')
   removeFirebaseToken(@Body() firebaseTokenDto: FirebaseTokenDto) {
     return this.userService.removeFirebaseToken(firebaseTokenDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/get-profile/:user_id')
+  getUserProfileByUserId(@Param('user_id') userId: string) {
+    return this.userService.getUserProfiles(userId);
   }
 }
