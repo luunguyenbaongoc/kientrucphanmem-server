@@ -19,12 +19,16 @@ import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
 import { RemoveMembersDto } from './dto/remove-members.dto';
 import { FindByGroupResult, FindByUserResult } from './types';
+import { ChatBoxService } from '../chat_box/chat_box.service';
+import { ChatBox } from 'src/entities';
 
 @Injectable()
 export class GroupMembersService {
   constructor(
     @InjectRepository(GroupMembers)
     private groupMembersRepository: Repository<GroupMembers>,
+    @InjectRepository(ChatBox)
+    private chatboxRepository: Repository<ChatBox>,
     private userService: UserService,
     private friendService: FriendService,
     @Inject(forwardRef(() => GroupService))
@@ -235,8 +239,16 @@ export class GroupMembersService {
         }
         await queryRunner.manager.save(group);
       }
-
       await queryRunner.manager.delete(GroupMembers, groupMember);
+
+      const chatbox = await this.chatboxRepository.findOneBy({
+        from_user: userId,
+        to_group: groupId,
+      });
+      if (chatbox) {
+        chatbox.deleted = true;
+        await queryRunner.manager.save(chatbox);
+      }
 
       await queryRunner.commitTransaction();
       return true;
