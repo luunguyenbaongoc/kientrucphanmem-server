@@ -1,4 +1,10 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatBox } from 'src/entities';
 import { UserService } from '../user/user.service';

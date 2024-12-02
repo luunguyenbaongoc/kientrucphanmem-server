@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ChatBoxService } from './chat_box.service';
 import { ChatBoxController } from './chat_box.controller';
 import { ChatBox } from 'src/entities';
@@ -13,8 +13,8 @@ import { GroupStatusModule } from '../group_status/group_status.module';
   imports: [
     TypeOrmModule.forFeature([ChatBox]),
     UserModule,
-    GroupModule,
     GroupStatusModule,
+    GroupModule,
   ],
   exports: [ChatBoxService],
 })

@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Group } from 'src/entities';
+import { ChatBox, Group } from 'src/entities';
 import { DataSource, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { AppError } from 'src/utils/AppError';
@@ -14,6 +14,8 @@ import { GroupMembersService } from '../group_members/group_members.service';
 import * as fs from 'fs';
 import * as path from 'path';
 import { FriendService } from '../friend/friend.service';
+import { ChatGateway } from 'src/modules/socket/chat/chat.gateway';
+import { CloudMessagingService } from 'src/modules/firebase/cloud-messaging/cloud-messaging.service';
 
 @Injectable()
 export class GroupService {
@@ -25,6 +27,8 @@ export class GroupService {
     private groupStatusService: GroupStatusService,
     private dataSource: DataSource,
     private friendService: FriendService,
+    private chatGateway: ChatGateway,
+    private cloudMessagingService: CloudMessagingService,
   ) {}
 
   async findByName(name: string): Promise<Group | undefined> {
@@ -73,6 +77,14 @@ export class GroupService {
       newMember.created_date = createdDate;
       await queryRunner.manager.save(newMember);
 
+      const ownerGroupChatBox = new ChatBox();
+      ownerGroupChatBox.from_user = userId;
+      ownerGroupChatBox.to_group = newGroup.id;
+      ownerGroupChatBox.last_accessed_date = createdDate;
+      ownerGroupChatBox.latest_updated_date = createdDate;
+      ownerGroupChatBox.new_message = true;
+      await queryRunner.manager.save(ownerGroupChatBox);
+
       if (user_ids) {
         for (let i = 0; i < user_ids.length; i++) {
           const uid = user_ids[i];
@@ -94,6 +106,29 @@ export class GroupService {
           newMember.created_by = userId;
           newMember.created_date = createdDate;
           await queryRunner.manager.save(newMember);
+
+          const groupChatBox = new ChatBox();
+          groupChatBox.from_user = uid;
+          groupChatBox.to_group = newGroup.id;
+          groupChatBox.last_accessed_date = createdDate;
+          groupChatBox.latest_updated_date = createdDate;
+          groupChatBox.new_message = true;
+          await queryRunner.manager.save(groupChatBox);
+        }
+
+        for (const id of user_ids) {
+          this.chatGateway.sendCreatedMessage(userId, id, newGroup.id, true);
+          const firebaseTokenList = await this.userService.getFirebaseTokenList(
+            id,
+          );
+          if (firebaseTokenList.length > 0) {
+            this.cloudMessagingService.sendMulticastMessage({
+              content: 'Tin nhắn mới',
+              title: 'Tin nhắn mới',
+              tokens: firebaseTokenList,
+              data: { payloadId: newGroup.id, isGroupChat: true.toString() },
+            });
+          }
         }
       }
 
