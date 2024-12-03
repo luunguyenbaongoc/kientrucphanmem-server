@@ -101,13 +101,7 @@ export class AuthService {
 
       await queryRunner.commitTransaction();
 
-      return {
-        ...registerResult,
-        is_success: true,
-        user: {
-          id: addedUser.id,
-        },
-      };
+      return await this.logIn({ phone: phone, password: password });
     } catch (ex) {
       Logger.error(ex);
       await queryRunner.rollbackTransaction();
