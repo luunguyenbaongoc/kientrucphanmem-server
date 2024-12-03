@@ -28,6 +28,8 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  private readonly logger = new Logger(AuthService.name);
+
   async checkUserExistByPhone(phone: string): Promise<boolean> {
     try {
       const userByPhone = await this.userService.findByPhone(phone);
@@ -182,6 +184,10 @@ export class AuthService {
         await argon2.hash(token.refresh_token),
       );
 
+      this.logger.log(
+        `Người dùng ${phone} đã đăng nhập vào hệ thống vào lúc ${new Date()}`,
+      );
+
       return {
         ...loginResult,
         is_success: true,
@@ -233,6 +239,12 @@ export class AuthService {
       const selectedRefreshToken = await this.getHashedRefreshTokenFromList(
         refreshToken,
         user.refresh_token_list,
+      );
+
+      this.logger.log(
+        `Người dùng ${
+          user.phone
+        } đã đăng xuất khỏi hệ thống vào lúc ${new Date()}`,
       );
 
       await this.userService.removeRefreshToken(
