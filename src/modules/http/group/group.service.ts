@@ -83,6 +83,9 @@ export class GroupService {
       ownerGroupChatBox.last_accessed_date = createdDate;
       ownerGroupChatBox.latest_updated_date = createdDate;
       ownerGroupChatBox.new_message = true;
+      ownerGroupChatBox.created_date = new Date();
+      ownerGroupChatBox.deleted = false;
+      ownerGroupChatBox.muted = false;
       await queryRunner.manager.save(ownerGroupChatBox);
 
       if (user_ids) {
@@ -113,6 +116,9 @@ export class GroupService {
           groupChatBox.last_accessed_date = createdDate;
           groupChatBox.latest_updated_date = createdDate;
           groupChatBox.new_message = true;
+          groupChatBox.created_date = new Date();
+          groupChatBox.deleted = false;
+          groupChatBox.muted = false;
           await queryRunner.manager.save(groupChatBox);
         }
 

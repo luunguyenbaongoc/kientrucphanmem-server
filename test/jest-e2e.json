@@ -10,5 +10,6 @@
     "^src/(.*)$": "<rootDir>/src/$1",
     "^test/(.*)$": "<rootDir>/test/$1"
   },
+  "setupFilesAfterEnv": ["<rootDir>/test/jest.setup.js"],
   "maxWorkers": 1
 }

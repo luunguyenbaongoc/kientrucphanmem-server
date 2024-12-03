@@ -89,6 +89,9 @@ export class GroupMembersService {
           groupChatBox.last_accessed_date = createdDate;
           groupChatBox.latest_updated_date = createdDate;
           groupChatBox.new_message = true;
+          groupChatBox.created_date = new Date();
+          groupChatBox.deleted = false;
+          groupChatBox.muted = false;
           await queryRunner.manager.save(groupChatBox);
         }
         members.push(newMember);

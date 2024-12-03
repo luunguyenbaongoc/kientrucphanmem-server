@@ -18,10 +18,10 @@ export class ChatBox {
   @Column()
   from_user: string;
 
-  @Column()
+  @Column({ nullable: true })
   to_user: string;
 
-  @Column()
+  @Column({ nullable: true })
   to_group: string;
 
   @Column()
