@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupModule } from '../group/group.module';
 import { UserModule } from '../user/user.module';
 import { ChatBoxModule } from '../chat_box/chat_box.module';
+import { GroupStatusModule } from '../group_status/group_status.module';
 
 @Module({
   providers: [ChatBoxChatLogService],
@@ -15,6 +16,7 @@ import { ChatBoxModule } from '../chat_box/chat_box.module';
     GroupModule,
     UserModule,
     ChatBoxModule,
+    GroupStatusModule,
   ],
   exports: [ChatBoxChatLogService],
 })

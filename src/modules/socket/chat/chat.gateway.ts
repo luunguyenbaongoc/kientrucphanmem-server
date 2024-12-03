@@ -61,4 +61,10 @@ export class ChatGateway
       .except(ownerId)
       .emit(WsEvent.RECEIVE_MESSAGE, { payloadId, isGroupChat });
   }
+
+  sendMessageToOwner(toId: string, payloadId: string, isGroupChat: boolean) {
+    this.server
+      .to(toId)
+      .emit(WsEvent.RECEIVE_MESSAGE, { payloadId, isGroupChat });
+  }
 }

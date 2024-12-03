@@ -10,6 +10,8 @@ import { GroupMembersService } from '../group_members/group_members.service';
 import { AppError } from 'src/utils/AppError';
 import { ErrorCode } from 'src/utils/error-code';
 import { ChatGateway } from 'src/modules/socket/chat/chat.gateway';
+import { CloudMessagingService } from 'src/modules/firebase/cloud-messaging/cloud-messaging.service';
+import { Platform } from 'src/utils/enums';
 
 @Injectable()
 export class ChatLogService {
@@ -22,6 +24,7 @@ export class ChatLogService {
     private chatboxService: ChatBoxService,
     private groupmembersService: GroupMembersService,
     private chatGateway: ChatGateway,
+    private cloudMessagingService: CloudMessagingService,
   ) {}
   private readonly logger = new Logger(ChatLogService.name);
 
@@ -33,8 +36,14 @@ export class ChatLogService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const { content, content_type_code, created_date, is_group_chat, to_id } =
-        insertDto;
+      const {
+        content,
+        content_type_code,
+        created_date,
+        is_group_chat,
+        to_id,
+        platform,
+      } = insertDto;
       const owner_id = ownerId;
 
       await this.userService.findByIdAndCheckExist(owner_id);
@@ -92,13 +101,20 @@ export class ChatLogService {
 
         //send socket to users in group except owner when all messages were saved to db
         for (const user of users) {
+          const toUserId = user.user_id;
           if (user.user_id !== ownerId) {
-            this.chatGateway.sendCreatedMessage(
-              ownerId,
-              user.user_id,
-              to_id,
-              true,
-            );
+            this.chatGateway.sendCreatedMessage(ownerId, toUserId, to_id, true);
+          }
+          const firebaseTokenList = await this.userService.getFirebaseTokenList(
+            toUserId,
+          );
+          if (firebaseTokenList.length > 0) {
+            this.cloudMessagingService.sendMulticastMessage({
+              content: 'Tin nhắn mới',
+              title: 'Tin nhắn mới',
+              tokens: firebaseTokenList,
+              data: { payloadId: to_id, isGroupChat: true.toString() },
+            });
           }
         }
       } else {
@@ -149,6 +165,35 @@ export class ChatLogService {
 
         //send socket to user when message is saved to db
         this.chatGateway.sendCreatedMessage(ownerId, to_id, ownerId, false);
+        const firebaseTokenList = await this.userService.getFirebaseTokenList(
+          to_id,
+        );
+        if (firebaseTokenList.length > 0) {
+          this.cloudMessagingService.sendMulticastMessage({
+            content: 'Tin nhắn mới',
+            title: 'Tin nhắn mới',
+            tokens: firebaseTokenList,
+            data: { payloadId: ownerId, isGroupChat: false.toString() },
+          });
+        }
+      }
+
+      if (platform === Platform.MOBILE) {
+        //send socket to sender when sent message from mobile
+        this.chatGateway.sendMessageToOwner(ownerId, ownerId, false);
+      } else {
+        //send firebase message to sender when sent message from web
+        const firebaseTokenList = await this.userService.getFirebaseTokenList(
+          ownerId,
+        );
+        if (firebaseTokenList.length > 0) {
+          this.cloudMessagingService.sendMulticastMessage({
+            content: 'Tin nhắn mới',
+            title: 'Tin nhắn mới',
+            tokens: firebaseTokenList,
+            data: { payloadId: ownerId, isGroupChat: false },
+          });
+        }
       }
 
       return newChatLog;

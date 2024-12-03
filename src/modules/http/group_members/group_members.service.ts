@@ -19,19 +19,28 @@ import { FindByUserDto } from './dto';
 import { GroupStatusCode } from 'src/utils/enums';
 import { RemoveMembersDto } from './dto/remove-members.dto';
 import { FindByGroupResult, FindByUserResult } from './types';
+import { ChatBox } from 'src/entities';
+import { ChatGateway } from 'src/modules/socket/chat/chat.gateway';
+import { CloudMessagingService } from 'src/modules/firebase/cloud-messaging/cloud-messaging.service';
 
 @Injectable()
 export class GroupMembersService {
   constructor(
     @InjectRepository(GroupMembers)
     private groupMembersRepository: Repository<GroupMembers>,
+    @InjectRepository(ChatBox)
+    private chatboxRepository: Repository<ChatBox>,
     private userService: UserService,
     private friendService: FriendService,
     @Inject(forwardRef(() => GroupService))
     private groupService: GroupService,
     private dataSource: DataSource,
     private groupStatusService: GroupStatusService,
+    private chatGateway: ChatGateway,
+    private cloudMessagingService: CloudMessagingService,
   ) {}
+
+  private readonly logger = new Logger(GroupMembersService.name);
 
   async addMembers(
     uerId: string,
@@ -41,18 +50,6 @@ export class GroupMembersService {
     try {
       await this.userService.findByIdAndCheckExist(uerId);
       await this.groupService.findByIdAndCheckExist(addMembersDto.group_id);
-
-      const member = await this.groupMembersRepository.findOneBy({
-        user_id: uerId,
-        group_id: addMembersDto.group_id,
-      });
-      if (!member) {
-        throw new AppError(
-          HttpStatus.BAD_REQUEST,
-          ErrorCode.BAD_REQUEST,
-          'Bạn không thuộc về nhóm này'
-        );
-      }
 
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -74,13 +71,52 @@ export class GroupMembersService {
         const newMember = new GroupMembers();
         newMember.group_id = addMembersDto.group_id;
         newMember.created_by = uerId;
-        newMember.user_id = addMembersDto.user_ids[i];
+        newMember.user_id = id;
         newMember.created_date = createdDate;
         await queryRunner.manager.save(newMember);
+
+        const chatbox = await this.chatboxRepository.findOneBy({
+          from_user: id,
+          to_group: addMembersDto.group_id,
+        });
+        if (chatbox) {
+          chatbox.deleted = false;
+          await queryRunner.manager.save(chatbox);
+        } else {
+          const groupChatBox = new ChatBox();
+          groupChatBox.from_user = id;
+          groupChatBox.to_group = addMembersDto.group_id;
+          groupChatBox.last_accessed_date = createdDate;
+          groupChatBox.latest_updated_date = createdDate;
+          groupChatBox.new_message = true;
+          await queryRunner.manager.save(groupChatBox);
+        }
         members.push(newMember);
       }
-
       await queryRunner.commitTransaction();
+
+      for (const id of addMembersDto.user_ids) {
+        this.chatGateway.sendCreatedMessage(
+          uerId,
+          id,
+          addMembersDto.group_id,
+          true,
+        );
+        const firebaseTokenList = await this.userService.getFirebaseTokenList(
+          id,
+        );
+        if (firebaseTokenList.length > 0) {
+          this.cloudMessagingService.sendMulticastMessage({
+            content: 'Tin nhắn mới',
+            title: 'Tin nhắn mới',
+            tokens: firebaseTokenList,
+            data: {
+              payloadId: addMembersDto.group_id,
+              isGroupChat: true.toString(),
+            },
+          });
+        }
+      }
 
       return members;
     } catch (ex) {
@@ -100,28 +136,72 @@ export class GroupMembersService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      const { group_id, user_ids } = removeMembersDto;
+
       await this.userService.findByIdAndCheckExist(userId);
       const isGroupAdmin = await this.groupService.checkUserIsGroupAdmin(
         userId,
-        removeMembersDto.group_id,
+        group_id,
       );
       if (!isGroupAdmin) {
         throw new AppError(
-          HttpStatus.UNAUTHORIZED,
-          ErrorCode.UNAUTHORIZED,
-          'Bạn không có quyền xoá người dùng khỏi nhóm. Liên hệ chủ nhóm để thực hiện.',
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Bạn không thể xóa thành viên vì không phải là chủ nhóm chat`,
         );
       }
       if (removeMembersDto.user_ids.indexOf(userId) !== -1) {
         // Can't delete admin user
-        return false;
+        throw new AppError(
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.BAD_REQUEST,
+          `Không thể xóa chủ nhóm chat`,
+        );
       }
 
-      await this.groupMembersRepository.delete({
-        group_id: removeMembersDto.group_id,
-        user_id: In(removeMembersDto.user_ids.filter((id) => id !== userId)),
-      });
+      // await this.groupMembersRepository.delete({
+      //   group_id: removeMembersDto.group_id,
+      //   user_id: In(removeMembersDto.user_ids.filter((id) => id !== userId)),
+      // });
+
+      for (const id of user_ids) {
+        await this.userService.findByIdAndCheckExist(id);
+        const groupMember = await this.groupMembersRepository.findOneBy({
+          group_id: group_id,
+          user_id: id,
+        });
+        if (groupMember) {
+          await queryRunner.manager.delete(GroupMembers, groupMember);
+        }
+        const chatbox = await this.chatboxRepository.findOneBy({
+          from_user: id,
+          to_group: group_id,
+        });
+        if (chatbox) {
+          chatbox.deleted = true;
+          await queryRunner.manager.save(chatbox);
+        }
+      }
       await queryRunner.commitTransaction();
+
+      for (const id of user_ids) {
+        this.chatGateway.sendCreatedMessage(userId, id, group_id, true);
+        const firebaseTokenList = await this.userService.getFirebaseTokenList(
+          id,
+        );
+        if (firebaseTokenList.length > 0) {
+          this.cloudMessagingService.sendMulticastMessage({
+            content: 'Tin nhắn mới',
+            title: 'Tin nhắn mới',
+            tokens: firebaseTokenList,
+            data: {
+              payloadId: group_id,
+              isGroupChat: true.toString(),
+            },
+          });
+        }
+      }
+
       return true;
     } catch (ex) {
       Logger.error(ex);
@@ -158,6 +238,7 @@ export class GroupMembersService {
               id: true,
               name: true,
               avatar: true,
+              owner_id: true,
               group_members: { user_id: true, group_id: true },
             },
           },
@@ -250,10 +331,43 @@ export class GroupMembersService {
         }
         await queryRunner.manager.save(group);
       }
-
       await queryRunner.manager.delete(GroupMembers, groupMember);
 
+      const chatbox = await this.chatboxRepository.findOneBy({
+        from_user: userId,
+        to_group: groupId,
+      });
+      if (chatbox) {
+        chatbox.deleted = true;
+        await queryRunner.manager.save(chatbox);
+      }
       await queryRunner.commitTransaction();
+
+      const remainingMembers = await this.findByGroupId(groupId);
+      for (const member of remainingMembers.users) {
+        if (member.user_id !== userId) {
+          this.chatGateway.sendCreatedMessage(
+            userId,
+            member.user_id,
+            groupId,
+            true,
+          );
+          const firebaseTokenList = await this.userService.getFirebaseTokenList(
+            member.user_id,
+          );
+          if (firebaseTokenList.length > 0) {
+            this.cloudMessagingService.sendMulticastMessage({
+              content: 'Tin nhắn mới',
+              title: 'Tin nhắn mới',
+              tokens: firebaseTokenList,
+              data: {
+                payloadId: groupId,
+                isGroupChat: true.toString(),
+              },
+            });
+          }
+        }
+      }
       return true;
     } catch (ex) {
       Logger.error(ex);

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsDateString, IsString } from 'class-validator';
+import { Platform } from 'src/utils/enums';
 
 export class InsertDto {
   @ApiProperty()
@@ -21,4 +22,7 @@ export class InsertDto {
   @ApiProperty()
   @IsString({ message: 'Không có to_id' })
   to_id: string;
+
+  @ApiProperty()
+  platform: Platform;
 }

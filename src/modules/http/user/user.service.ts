@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Profile, User } from 'src/entities';
 import { AppError } from 'src/utils/AppError';
@@ -6,6 +6,7 @@ import { ErrorCode } from 'src/utils/error-code';
 import { Repository } from 'typeorm';
 import { AddProfileDto, UpdateProfileDto } from '../profile/dto';
 import { ProfileService } from '../profile/profile.service';
+import { FirebaseTokenDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -15,8 +16,23 @@ export class UserService {
     private profileService: ProfileService,
   ) {}
 
+  private readonly logger = new Logger(UserService.name);
+
   async findByPhone(phone: string): Promise<User | undefined> {
     return await this.userRepository.findOneBy({ phone });
+  }
+
+  async findUserInfoByPhone(phone: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({
+      where: { phone },
+      relations: ['profile'],
+      select: {
+        id: true,
+        phone: true,
+        active: true,
+        profile: { id: true, avatar: true, fullname: true },
+      },
+    });
   }
 
   async findByPhoneAndCheckExist(phone: string): Promise<User | undefined> {
@@ -114,5 +130,64 @@ export class UserService {
       avatar: filepath,
     } as UpdateProfileDto);
     return `File uploaded successfully: ${filepath}`;
+  }
+
+  private checkFirebaseToken(token_list: string[], token: string) {
+    for (const t of token_list) {
+      if (t === token) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async addFirebaseToken(
+    userId: string,
+    firebaseTokenDto: FirebaseTokenDto,
+  ): Promise<boolean | undefined> {
+    try {
+      const { token } = firebaseTokenDto;
+      const user = await this.findByIdAndCheckExist(userId);
+      const tempList = [...user.firebase_token_list];
+      if (!this.checkFirebaseToken(tempList, token)) {
+        user.firebase_token_list.push(token);
+        await this.userRepository.save(user);
+      }
+      return true;
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async removeFirebaseToken(
+    firebaseTokenDto: FirebaseTokenDto,
+  ): Promise<boolean | undefined> {
+    try {
+      const { userId, token } = firebaseTokenDto;
+      const user = await this.findByIdAndCheckExist(userId);
+      const tempList = [...user.firebase_token_list];
+      if (this.checkFirebaseToken(tempList, token)) {
+        const firebaseTokenList = user.firebase_token_list.filter(
+          (o) => o !== token,
+        );
+        user.firebase_token_list = [...firebaseTokenList];
+        await this.userRepository.save(user);
+      }
+      return true;
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
+  }
+
+  async getFirebaseTokenList(userId: string): Promise<string[] | undefined> {
+    try {
+      const user = await this.findByIdAndCheckExist(userId);
+      return user.firebase_token_list;
+    } catch (ex) {
+      this.logger.error(ex);
+      throw ex;
+    }
   }
 }
