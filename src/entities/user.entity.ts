@@ -27,6 +27,9 @@ export class User {
   @Column({ type: 'jsonb', default: [] })
   refresh_token_list: string[];
 
+  @Column({ type: 'jsonb', default: [] })
+  firebase_token_list: string[];
+
   @Column()
   active: boolean;
 

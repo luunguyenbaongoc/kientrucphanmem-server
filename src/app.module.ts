@@ -18,6 +18,7 @@ import { ChatLogContentTypeModule } from './modules/http/chat_log_content_type/c
 import { ChatLogModule } from './modules/http/chat_log/chat_log.module';
 import { ChatBoxModule } from './modules/http/chat_box/chat_box.module';
 import { ChatBoxChatLogModule } from './modules/http/chat_box_chat_log/chat_box_chat_log.module';
+import { CloudMessagingModule } from './modules/firebase/cloud-messaging/cloud-messaging.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ChatBoxChatLogModule } from './modules/http/chat_box_chat_log/chat_box_
     ChatLogModule,
     ChatBoxModule,
     ChatBoxChatLogModule,
+    CloudMessagingModule,
   ],
   controllers: [],
   providers: [

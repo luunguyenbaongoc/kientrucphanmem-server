@@ -14,6 +14,8 @@ import { UserService } from './user.service';
 import { UpdateProfileDto } from '../profile/dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { Request } from 'express';
+import { AuthUser, Public } from 'src/decorators';
+import { FirebaseTokenDto } from './dto';
 
 @ApiTags('User')
 @ApiBearerAuth()
@@ -25,8 +27,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json')
   @Get('me/profiles/')
-  getUserProfiles(@Req() req: Request) {
-    const userId = req.user['id'];
+  getUserProfiles(@AuthUser() userId: string) {
+    // const userId = req.user['id'];
     return this.userService.getUserProfiles(userId);
   }
 
@@ -46,5 +48,27 @@ export class UserController {
   @Get('/find-by-phone/:phone')
   findUserInfoByPhone(@Param('phone') phone: string) {
     return this.userService.findUserInfoByPhone(phone);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('/add-firebase-token')
+  addFirebaseToken(
+    @AuthUser() userId,
+    @Body() firebaseTokenDto: FirebaseTokenDto,
+  ) {
+    return this.userService.addFirebaseToken(userId, firebaseTokenDto);
+  }
+
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('/remove-firebase-token')
+  removeFirebaseToken(@Body() firebaseTokenDto: FirebaseTokenDto) {
+    return this.userService.removeFirebaseToken(firebaseTokenDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/get-profile/:user_id')
+  getUserProfileByUserId(@Param('user_id') userId: string) {
+    return this.userService.getUserProfiles(userId);
   }
 }

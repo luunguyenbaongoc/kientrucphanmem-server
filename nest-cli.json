@@ -4,6 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "assets": [
+      "modules/**/*.json",
       {
         "include": "../public",
         "outDir": "dist",

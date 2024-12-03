@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   Param,
   Delete,
+  Get,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { GroupService } from './group.service';
@@ -100,5 +101,11 @@ export class GroupController {
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   deleteUserGroup(@AuthUser() userId: string, @Param('id') id: string) {
     return this.groupService.delete(userId, id);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('/:id')
+  get(@Param('id') id: string) {
+    return this.groupService.findByIdAndCheckExist(id);
   }
 }

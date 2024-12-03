@@ -12,8 +12,8 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Zalỏ App API')
-    .setDescription('API Documentation for Zalỏ')
+    .setTitle('Zola App API')
+    .setDescription('API Documentation for Zola')
     .setVersion('1.0')
     .addBasicAuth()
     .addApiKey()

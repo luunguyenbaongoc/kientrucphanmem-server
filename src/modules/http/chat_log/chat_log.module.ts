@@ -8,6 +8,7 @@ import { ChatLogContentTypeModule } from '../chat_log_content_type/chat_log_cont
 import { ChatBoxModule } from '../chat_box/chat_box.module';
 import { GroupMembersModule } from '../group_members/group_members.module';
 import { ChatModule } from 'src/modules/socket/chat/chat.module';
+import { CloudMessagingModule } from 'src/modules/firebase/cloud-messaging/cloud-messaging.module';
 
 @Module({
   providers: [ChatLogService],
@@ -19,6 +20,7 @@ import { ChatModule } from 'src/modules/socket/chat/chat.module';
     ChatBoxModule,
     GroupMembersModule,
     ChatModule,
+    CloudMessagingModule,
   ],
   exports: [ChatLogService],
 })

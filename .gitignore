@@ -408,3 +408,5 @@ config.yaml
 
 # Media files
 uploads/
+
+firebase-admin-sdk.json

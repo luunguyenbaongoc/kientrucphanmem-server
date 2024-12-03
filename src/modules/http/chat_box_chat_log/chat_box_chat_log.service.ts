@@ -1,11 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ChatBoxChatLog } from 'src/entities';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { GroupService } from '../group/group.service';
 import { GetChatBoxDetailDto } from './dto';
 import { ChatBoxService } from '../chat_box/chat_box.service';
+import { GroupStatusCode } from 'src/utils/enums';
+import { GroupStatusService } from '../group_status/group_status.service';
 
 @Injectable()
 export class ChatBoxChatLogService {
@@ -15,6 +17,7 @@ export class ChatBoxChatLogService {
     private userService: UserService,
     private groupService: GroupService,
     private chatboxService: ChatBoxService,
+    private groupStatusService: GroupStatusService,
   ) {}
 
   async getChatBoxDetailBy(
@@ -52,9 +55,27 @@ export class ChatBoxChatLogService {
         }
       }
       if (chatboxId) {
+        const groupStatus =
+          await this.groupStatusService.findByCodeAndCheckExist(
+            GroupStatusCode.ACTIVE,
+          );
         return await this.chatboxChatLogRepository.find({
-          where: { chat_box_id: chatboxId },
-          relations: ['chat_log', 'chat_log.content_type'],
+          where: [
+            {
+              chat_box_id: chatboxId,
+              chat_box: {
+                to_group_profile: { group_status_id: groupStatus.id },
+                to_user_profile: IsNull(),
+              },
+            },
+            {
+              chat_box_id: chatboxId,
+              chat_box: {
+                to_group_profile: IsNull(),
+              },
+            },
+          ],
+          relations: ['chat_box', 'chat_log', 'chat_log.content_type'],
           select: {
             id: true,
             chat_box_id: true,
