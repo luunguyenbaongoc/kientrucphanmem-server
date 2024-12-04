@@ -8,7 +8,6 @@ export * from './friend_request.entity';
 export * from './group_members.entity';
 export * from './group_status.entity';
 export * from './chat_box.entity';
-export * from './emote.entity';
 export * from './chat_log.entity';
 export * from './chat_box_chat_log.entity';
 export * from './chat_log_content_type.entity';

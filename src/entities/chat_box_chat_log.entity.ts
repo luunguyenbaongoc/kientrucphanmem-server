@@ -25,9 +25,6 @@ export class ChatBoxChatLog {
   @Column()
   deleted: boolean;
 
-  @Column()
-  emote_id: string;
-
   @ManyToOne(() => ChatBox, (ChatBox) => ChatBox.id, { eager: false })
   @JoinColumn({ name: 'chat_box_id' })
   chat_box: ChatBox;
