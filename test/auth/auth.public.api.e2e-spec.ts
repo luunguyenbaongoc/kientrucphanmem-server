@@ -62,15 +62,21 @@ describe('PublicAuthAPI (e2e)', () => {
       .send({ fullname: 'John Doe', phone: '012345678', password })
       .expect(HttpStatus.CREATED)
       .expect((response) => {
-        expect(response.body).toEqual({
-          error: null,
-          is_success: true,
-          user: {
-            id: expect.stringMatching(
-              /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89a-b][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
-            ),
-          },
-        });
+        expect(response.body.error).toBeNull();
+        expect(response.body.is_success).toBe(true);
+        expect(response.body.user.id).toMatch(
+          /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89a-b][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
+        );
+
+        expect(response.body.access_token).toBeDefined();
+        expect(typeof response.body.access_token).toBe('string');
+        expect(response.body.access_token.length).toBeGreaterThan(0);
+
+        expect(response.body.refresh_token).toBeDefined();
+        expect(typeof response.body.refresh_token).toBe('string');
+        expect(response.body.refresh_token.length).toBeGreaterThan(0);
+        // Expect password not present in the response body
+        expect(response.body.password).toBeUndefined();
       });
   });
 

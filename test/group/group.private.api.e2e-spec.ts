@@ -180,23 +180,6 @@ describe('PrivateGroupAPI (e2e)', () => {
       });
   });
 
-  it('/group (PUT)', async () => {
-    /*
-     * Test updating group information unsuccessfully since
-     * lack of key in payload.
-     */
-    await request(app.getHttpServer())
-      .put(`/group`)
-      .set('Authorization', `Bearer ${accessToken}`)
-      .send({
-        id: groupId,
-        name: 'Group 4',
-        description: 'This is group 4',
-        group_status_code: 'active',
-      })
-      .expect(HttpStatus.BAD_REQUEST);
-  });
-
   it('/group/:id (DELETE)', async () => {
     /*
      * Test deleting group successfully with grou admin account

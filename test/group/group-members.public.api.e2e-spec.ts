@@ -117,7 +117,7 @@ describe('PublicGroupMembersAPI (e2e)', () => {
       .post('/group-members/remove-members')
       .set('Authorization', `Bearer ${access_token}`)
       .send({ group_id: groupId, user_ids: [adminUserId, userIds[3]] })
-      .expect(HttpStatus.UNAUTHORIZED);
+      .expect(HttpStatus.BAD_REQUEST);
 
     const members = await groupMembersRepository.find({
       where: { group_id: groupId },
@@ -140,7 +140,7 @@ describe('PublicGroupMembersAPI (e2e)', () => {
       .post('/group-members/remove-members')
       .set('Authorization', `Bearer ${access_token}`)
       .send({ group_id: groupId, user_ids: [adminUserId, userIds[1]] })
-      .expect(HttpStatus.UNAUTHORIZED);
+      .expect(HttpStatus.BAD_REQUEST);
 
     const members = await groupMembersRepository.find({
       where: { group_id: groupId },

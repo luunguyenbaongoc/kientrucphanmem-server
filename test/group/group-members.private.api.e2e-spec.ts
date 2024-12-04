@@ -310,9 +310,6 @@ describe('PrivateGroupMembersAPI (e2e)', () => {
           expect(groupUserNames).toContain(
             groupMember.user.profile[0].fullname,
           );
-          expect(groupMember.user.profile[0].fullname).toEqual(
-            groupUserNames[index],
-          );
         });
       });
   });

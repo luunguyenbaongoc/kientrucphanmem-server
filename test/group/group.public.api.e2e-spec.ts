@@ -100,6 +100,22 @@ describe('PublicGroupAPI (e2e)', () => {
       .expect(HttpStatus.UNAUTHORIZED);
   });
 
+  it('/group (PUT)', async () => {
+    /*
+     * Test updating group information unsuccessfully since
+     * lack of key in payload.
+     */
+    await request(app.getHttpServer())
+      .put(`/group`)
+      .send({
+        id: groupId,
+        name: 'Group 4',
+        description: 'This is group 4',
+        group_status_code: 'active',
+      })
+      .expect(HttpStatus.UNAUTHORIZED);
+  });
+
   it('/group/:id (DELETE)', async () => {
     /*
      * Test delete group unsuccessfully because of unauthenticated user.
