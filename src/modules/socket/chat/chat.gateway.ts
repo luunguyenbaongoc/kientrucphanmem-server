@@ -3,11 +3,10 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Socket, Server } from 'socket.io';
+import { Server } from 'socket.io';
 import { WsJwtGuard } from '../auth/ws-jwt/ws-jwt.guard';
 import { AuthSocket } from '../auth/types';
 import { SocketAuthMiddleware } from '../auth/middlewares/ws.mw';

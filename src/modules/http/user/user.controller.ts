@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UpdateProfileDto } from '../profile/dto';
+import { AddProfileDto } from '../profile/dto';
 import { JwtAuthGuard } from '../auth/guards';
 import { Request } from 'express';
 import { AuthUser, Public } from 'src/decorators';
@@ -36,12 +36,9 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiConsumes('application/json')
   @Post('me/profiles/')
-  createUserProfile(
-    @Req() req: Request,
-    @Body() updateProfileDto: UpdateProfileDto,
-  ) {
+  createUserProfile(@Req() req: Request, @Body() addProfileDto: AddProfileDto) {
     const userId = req.user['id'];
-    return this.userService.createUserProfile(userId, updateProfileDto);
+    return this.userService.createUserProfile(userId, addProfileDto);
   }
 
   @HttpCode(HttpStatus.OK)

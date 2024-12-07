@@ -14,9 +14,11 @@ export class ProfileService {
   ) {}
 
   async addProfile(profile: Profile): Promise<Profile | undefined> {
-    await this.profilesRepository.insert(profile);
+    const result = await this.profilesRepository.insert(profile);
+    const newProfileId = result.identifiers[0]?.id;
     return await this.profilesRepository.findOneBy({
       user_id: profile.user_id,
+      id: newProfileId,
     });
   }
 

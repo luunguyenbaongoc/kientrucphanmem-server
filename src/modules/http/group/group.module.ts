@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { GroupController } from './group.controller';
 import { GroupService } from './group.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,6 +16,7 @@ import { CloudMessagingModule } from 'src/modules/firebase/cloud-messaging/cloud
     TypeOrmModule.forFeature([Group, GroupStatus, ChatBox]),
     GroupMembersModule,
     UserModule,
+    FriendModule,
     GroupStatusModule,
     FriendModule,
     ChatModule,

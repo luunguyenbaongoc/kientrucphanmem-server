@@ -24,14 +24,14 @@ export class GroupMembersController {
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @Post('/')
-  addGroup(@AuthUser() userId: string, @Body() addMembersDto: AddMembersDto) {
+  addMembers(@AuthUser() userId: string, @Body() addMembersDto: AddMembersDto) {
     return this.groupMembersService.addMembers(userId, addMembersDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @ApiConsumes('application/json')
   @Post('/remove-members')
-  addMembers(
+  removeMembers(
     @AuthUser() userId: string,
     @Body() removeMembersDto: RemoveMembersDto,
   ) {

@@ -4,8 +4,8 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: development
+      dockerfile: test.Dockerfile
+      target: test
     ports:
       - "3000:3000"
     volumes:

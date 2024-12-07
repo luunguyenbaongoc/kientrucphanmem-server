@@ -4,7 +4,6 @@ import {
   HttpStatus,
   UseInterceptors,
   Post,
-  Patch,
   Param,
   Body,
   UseGuards,
