@@ -1,0 +1,34 @@
+# Ignore node modules (dependencies will be installed during the Docker build)
+node_modules/
+dist/
+build/
+
+# Logs
+*.log
+logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (you should pass these through environment variables in production)
+.env
+.env.test
+.env.* # If you're using different environment files per environment
+
+# Local development files
+.DS_Store
+*.local
+*.cache
+.vscode
+.idea
+*.swp
+
+# Docker ignore itself
+.dockerignore
+
+# Git repository data
+.git
+.gitignore
+
+# VsCode
+.vscode
